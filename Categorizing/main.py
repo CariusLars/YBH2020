@@ -139,7 +139,9 @@ class CustomerSupport(object):
         html_doc = ""
         html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Aktualisieren"> </form>'
         html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Email Anfragen Importieren"> </form>'
-        table = SupportItemTableView(self.supportRequests)
+        filteredSupportRequests = [
+            supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["Mitarbeiter"] != "done"]
+        table = SupportItemTableView(self.filteredSupportRequests)
         html_doc += table.__html__()
         return html_doc
 
@@ -209,7 +211,7 @@ class CustomerSupport(object):
         else:
             html_doc += "<p>Angemeldet als: " + self.loginName + "</p>"
             html_doc += '<form action="logout" method="get"><input type="submit" value="Logout"> </form>'
-            html_doc += 'The following tickets have been assigned to you:<br>'
+            html_doc += 'Ihnen wurden die folgenden Anfragen zugeteilt:<br>'
             filteredSupportRequests = [
                 supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["assignee"] == self.loginName]
             table = SupportItemTableEdit(filteredSupportRequests)
