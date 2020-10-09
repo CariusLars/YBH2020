@@ -20,7 +20,6 @@ class CustomerSupport(object):
         return "Hello World!\nYou might want to navigate to the <a href='web/index.html'>Customer Support Site</a>"
 
     def webServeFromDirectory(self, path):
-        print("webServeFromDirectory called with path=", path)
         return send_from_directory('web_interface', path)
 
     def customerRequestCallback(self):
@@ -46,10 +45,7 @@ class CustomerSupport(object):
         pass
 
     def generateHtmlTableAllRequests(self):
-        items = [dict(name='Name1', topic='Topic1'),
-                 dict(name='Name2', topic='Topic2'),
-                 dict(name='Name3', topic='Topic3')]
-        table = SupportItemTable(items)
+        table = SupportItemTable(self.supportRequests)
         return table.__html__()
 
 
