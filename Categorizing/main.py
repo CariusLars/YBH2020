@@ -25,7 +25,6 @@ class CustomerSupport(object):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
                          "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
                "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
-        self.supportRequests.append(req)
 
     def sendAllMailRequests(self):
         list_of_mails = ParseMails.as_json(unique_content=True)
@@ -53,21 +52,31 @@ class CustomerSupport(object):
         pass
         # TODO(jonathan,chris); call assingRequest afterwards
 
-    def assignRequest(self, contactDetailsString):
-        thresholdUncertainCategory = 10
+    def assignRequest(self, requestID):
+        thresholdUncertainCategory = 4
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
-        #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Bechwerden", "Storungen", "Wasser"]
-        request = [request for request in self.processedRequests if request["input"]["contact_details"] == contactDetailsString][0]
+        #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
+        request = [request for request in self.processedRequests if request["input"]["id"] == contactDetailsString][0]
+
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
             # Get employee with least emails to process
-
+            all_employees = {}
+            for key in self.employees:
+                all_employees.update(self.employees[key])
+            availableEmployee = min(all_employees, key=all_employees.get)
             # Assign to this employee
-
+            request['output']['assignee'] = availableEmployee
             # Increase counter
+            
+
         else:
             # Get employee with least emails to process from this category
-            min(self.employees[request["output"]["category"]], key=self.employees[request["output"]["category"]].get)
+            availableEmployee = min(self.employees[request["output"]["category"]], key=self.employees[request["output"]["category"]].get)
+            # Assign to this employee
+            request['output']['assignee'] = availableEmployee
+            # Increase counter
+            self.employees[request["output"]["category"]][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
 
     def populateDebugProcessedRequests(self):
         response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
@@ -76,10 +85,10 @@ class CustomerSupport(object):
 
     def checkProcessedRequestsCallback(self):
         print("called checkProcessedRequestsCallback")
-        user_id = request.args.get('request_id')
+        id = request.args.get('request_id')
 
         returnElements = [
-            processedRequest for processedRequest in self.processedRequests if processedRequest['contact_details'] == user_id]
+            processedRequest for processedRequest in self.processedRequests if processedRequest['id'] == id]
         print(self.processedRequests)
         print(returnElements)
 
