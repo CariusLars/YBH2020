@@ -5,10 +5,9 @@ data = {'input':
 		'contact_details': str
 		},
 	'output' : {'timestamp': datetime,
-         'sentiment': [strs],
-         'sentiment_prob': float,
-         'categories': [strs],
-         'categories_prob': [floats],
+         'extreme_negative': boolean,
+         'category': str,
+         'category_score': float,
 	 'assignee' : string,
 	 'answers': [strs]}
 	}
