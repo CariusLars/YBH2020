@@ -54,17 +54,24 @@ class CustomerSupport(object):
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestID):
+        #print(self.supportRequests)
         request = [request for request in self.supportRequests if request["input"]["id"] == requestID][0]
         resultDict = nlp.packaged_results(request["input"]["id"], request["input"]["timestamp"], request["input"]["message"], request["input"]["user_name"], request["input"]["contact_details"])
-        print(request)
-        print(resultDict)
+        request["output"]["category"] = resultDict["category"]
+        request["output"]["category_score"] = resultDict["category_score"]
+        request["output"]["extreme_negative"] = resultDict["extreme_negative"]
+
+        #print(self.supportRequests)
+        #print(request)
+        #print(resultDict)
         # TODO(jonathan,chris); call assingRequest afterwards
+
 
     def assignRequest(self, requestID):
         thresholdUncertainCategory = 4
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
-        request = [request for request in self.processedRequests if request["input"]
+        request = [request for request in self.supportRequests if request["input"]
                    ["id"] == requestID][0]
 
         # Check if this is a diverse request
