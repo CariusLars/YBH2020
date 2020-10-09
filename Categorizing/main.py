@@ -27,6 +27,7 @@ class CustomerSupport(object):
         # TODO(lars)
         print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
+        print(request.form)
         # TODO(lars) call analyzeRequest
         return 'Received the request!\n'  # response to your request.
 
