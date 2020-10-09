@@ -121,7 +121,11 @@ def main():
             payload = {"request_id": str(request_id)}
             resp = requests.get(
                 backend_addr + "/checkProcessedRequestsCallback", params=payload)
-            result = resp.json()
+            result = None
+            try:
+                result = resp.json()
+            except:
+                pass
             if result:  # True if requested customer ID is in the processed request database
                 if "@" not in result['contact_details']:
                     customerServiceBot.send_message(result['contact_details'],
