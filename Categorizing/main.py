@@ -11,6 +11,7 @@ class CustomerSupport(object):
     def __init__(self):
         self.supportRequests = []
         self.processedRequests = []
+        self.loginName = None
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -29,10 +30,10 @@ class CustomerSupport(object):
         #print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
         serviceRequest = {"input": request.form.to_dict(),
-               "output": {"timestamp": -1, "sentiment": [], "sentiment_prob": [], "categories": [], "categories_prob": [], "assignee": "", "answers": []}}
+                          "output": {"timestamp": -1, "sentiment": [], "sentiment_prob": [], "categories": [], "categories_prob": [], "assignee": "", "answers": []}}
 
         self.supportRequests.append(serviceRequest)
-        #analyzeRequest(serviceRequest)
+        # analyzeRequest(serviceRequest)
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestJson):
@@ -44,14 +45,16 @@ class CustomerSupport(object):
         # TODO(jan)
 
     def populateDebugProcessedRequests(self):
-        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply":-1, "contact_details": "266433173", "user_name": "Lars", "assignee":"Halbes Hähnchen", "message":"Nicht so schlimm, wir liefern schnell eine Neue!"}
+        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
+                    "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
         self.processedRequests.append(response)
 
     def checkProcessedRequestsCallback(self):
         print("called checkProcessedRequestsCallback")
-        user_id =request.args.get('request_id')
+        user_id = request.args.get('request_id')
 
-        returnElements = [processedRequest for processedRequest in self.processedRequests if processedRequest['contact_details'] == user_id]
+        returnElements = [
+            processedRequest for processedRequest in self.processedRequests if processedRequest['contact_details'] == user_id]
         print(self.processedRequests)
         print(returnElements)
 
@@ -64,6 +67,36 @@ class CustomerSupport(object):
         table = SupportItemTable(self.supportRequests)
         return table.__html__()
 
+    def deleteRequestCallback(self):
+        msg = "Deleted service request from "
+        msg += request.args.get('id')
+        return msg
+
+    def serviceWorkerProcessing(self):
+        html_doc = ""
+
+        if self.loginName is None:
+            html_doc += "<p>Please log in</p>"
+            html_doc += '<form action="login" method="get"> Name: <input type="text" name="name"> <input type="submit" value="Submit"> </form>'
+        else:
+            html_doc += "<p>Logged in as " + self.loginName + "</p>"
+            html_doc += '<form action="logout" method="get"><input type="submit" value="Logout"> </form>'
+            html_doc += 'The following tickets have been assigned to you:<br>'
+            filteredSupportRequests = [
+                supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["assignee"] == self.loginName]
+            table = SupportItemTable(filteredSupportRequests)
+            html_doc += table.__html__()
+
+        return html_doc
+
+    def loginCallback(self):
+        self.loginName = request.args.get('name')
+        return "Successfully logged in as " + self.loginName
+
+    def logoutCallback(self):
+        self.loginName = None
+        return "Successfully logged out"
+
 
 if __name__ == "__main__":
     customerSupport = CustomerSupport()
@@ -73,7 +106,6 @@ if __name__ == "__main__":
 
     # declare flask callbacks
     flaskApp.add_url_rule('/', view_func=customerSupport.hello_world)
-    # to test: curl --data "param1=value1&param2=value2&foo=123{a:b, c:d}&otherData=blub" 127.0.0.1:5000/customerRequestCallback
     flaskApp.add_url_rule('/customerRequestCallback',
                           methods=['POST'], view_func=customerSupport.customerRequestCallback)
     flaskApp.add_url_rule('/checkProcessedRequestsCallback',
@@ -84,6 +116,14 @@ if __name__ == "__main__":
                           view_func=customerSupport.webServeFromDirectory)
     flaskApp.add_url_rule('/web/generateHtmlTableAllRequests',
                           view_func=customerSupport.generateHtmlTableAllRequests)
+    flaskApp.add_url_rule(
+        '/delete', methods=['POST'], view_func=customerSupport.deleteRequestCallback)
+    flaskApp.add_url_rule('/web/serviceWorkerProcessing',
+                          view_func=customerSupport.serviceWorkerProcessing)
+    flaskApp.add_url_rule(
+        '/web/login', view_func=customerSupport.loginCallback)
+    flaskApp.add_url_rule(
+        '/web/logout', view_func=customerSupport.logoutCallback)
 
     # Debugging, remove later
     customerSupport.populateDebugSupportRequests()
