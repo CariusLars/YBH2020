@@ -19,7 +19,7 @@ class CustomerSupport(object):
         raw = pd.read_excel('./../data/mitarbeiterplan.xls')
         self.employees = {x: {} for x in raw}
         for key in self.employees.keys(): self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
-        print(self.employees)
+        #print(self.employees)
 
     def populateDebugSupportRequests(self):
         req = {"input": {"id": 1, "timestamp": 1, "message": "My internet is leaking",
@@ -69,7 +69,7 @@ class CustomerSupport(object):
             # Assign to this employee
             request['output']['assignee'] = availableEmployee
             # Increase counter
-            
+
 
         else:
             # Get employee with least emails to process from this category
