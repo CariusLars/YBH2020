@@ -17,9 +17,19 @@ class CustomerSupport(object):
     # just allows POST requests
 
     def customerRequestCallback(self):
+        # TODO(lars)
         print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
+        # TODO(lars) call analyzeRequest
         return 'Received the request!\n'  # response to your request.
+
+    def analyzeRequest(self, requestJson):
+        pass
+        # TODO(jonathan,chris); call assingRequest afterwards
+
+    def assignRequest(self, requestJson):
+        pass
+        # TODO(jan)
 
 
 if __name__ == "__main__":
