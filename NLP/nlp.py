@@ -38,7 +38,7 @@ def google_sentiment(text):
     annotations = client.analyze_sentiment(document=document)
     score = annotations.document_sentiment.score
     magnitude = annotations.document_sentiment.magnitude
-    if (score <= 0.1):
+    if (score <= 0.0):
         ex_negative = True
     else:
         ex_negative = False
