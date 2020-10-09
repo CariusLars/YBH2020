@@ -69,7 +69,7 @@ class CustomerSupport(object):
 
 
     def assignRequest(self, requestID):
-        thresholdUncertainCategory = -1
+        thresholdUncertainCategory = 4
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
         request = [request for request in self.supportRequests if request["input"]
@@ -102,6 +102,8 @@ class CustomerSupport(object):
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
         print("supportRequests:")
         print(self.supportRequests)
+        print("Employee Status")
+        print(self.employees)
 
     def populateDebugProcessedRequests(self):
         response = {"id":1234,"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
