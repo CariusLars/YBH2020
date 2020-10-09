@@ -78,6 +78,9 @@ def main():
             for agent in crmAgents:
                 crmBot.send_message(agent, 'Kundenanfrage\nZeitstemepel: {}\nKunde: {}\nInhalt: {}'.format(readableDateTime, last_chat_name, last_chat_text))
                 #crmBot.send_message(agent, "Antwort an:" + user_link, parse_mode = "Markdown")
+
+            r = requests.post('http://127.0.0.1:5000/customerRequestCallback', {"key": "value"})
+            print(r.status_code)
         else:
             customerServiceBot.send_message(last_chat_id,
                                             'Bitte senden Sie Ihre Anfrage in einer Nachricht, um eine schnellstmögliche Bearbeitung zu ermöglichen')
