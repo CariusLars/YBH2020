@@ -34,4 +34,4 @@ class SupportItemTableEdit(Table):
     action_del = ButtonCol('Delete', 'deleteRequestCallback',
                            url_kwargs=dict(id=['input', 'user_name']))
     action_reply = ButtonCol('Reply', 'replyRequestCallback',
-                             url_kwargs=dict(id=['input', 'user_name']))
+                             url_kwargs=dict(id=['input', 'id']))

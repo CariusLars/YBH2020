@@ -7,6 +7,7 @@ import json
 import datetime
 import ParseMails
 import pandas as pd
+import nlp
 
 
 class CustomerSupport(object):
@@ -48,22 +49,37 @@ class CustomerSupport(object):
                           "output": {"timestamp": -1, "extreme_negative": False, "category": None, "category_score": 0, "assignee": "", "answers": []}}
 
         self.supportRequests.append(serviceRequest)
-        # analyzeRequest(serviceRequest)
+
+        self.analyzeRequest(serviceRequest["input"]["id"])
         return 'Received the request!\n'  # response to your request.
 
-    def analyzeRequest(self, requestJson):
-        pass
+    def analyzeRequest(self, requestID):
+        # print(self.supportRequests)
+        request = [
+            request for request in self.supportRequests if request["input"]["id"] == requestID][0]
+        resultDict = nlp.packaged_results(request["input"]["id"], request["input"]["timestamp"],
+                                          request["input"]["message"], request["input"]["user_name"], request["input"]["contact_details"])
+        request["output"]["category"] = resultDict["category"]
+        request["output"]["category_score"] = resultDict["category_score"]
+        request["output"]["extreme_negative"] = resultDict["extreme_negative"]
+
+        self.assignRequest(requestID)
+        # print(self.supportRequests)
+        # print(request)
+        # print(resultDict)
         # TODO(jonathan,chris); call assingRequest afterwards
 
     def assignRequest(self, requestID):
         thresholdUncertainCategory = 4
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
-        request = [request for request in self.processedRequests if request["input"]
-                   ["id"] == contactDetailsString][0]
+        request = [request for request in self.supportRequests if request["input"]
+                   ["id"] == requestID][0]
 
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
+            print("Diverse request. Category {}, Score {}".format(
+                request["output"]["category"], request["output"]["category_score"]))
             # Get employee with least emails to process
             all_employees = {}
             for key in self.employees:
@@ -86,9 +102,13 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
+        print("supportRequests:")
+        print(self.supportRequests)
+        print("Employee Status")
+        print(self.employees)
 
     def populateDebugProcessedRequests(self):
-        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
+        response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
                     "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
         self.processedRequests.append(response)
 
@@ -98,8 +118,8 @@ class CustomerSupport(object):
 
         returnElements = [
             processedRequest for processedRequest in self.processedRequests if processedRequest['id'] == id]
-        print(self.processedRequests)
-        print(returnElements)
+        # print(self.processedRequests)
+        # print(returnElements)
 
         if len(returnElements) > 0:
             return returnElements[-1]
@@ -122,10 +142,36 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
-        msg = "Replying to service request from "
-        msg += request.args.get('id')
-        return msg
-        # TODO(jan) make reply mask with reply button
+        html_doc = "<p>Replying to service request from "
+        html_doc += request.args.get('id') + "</p"
+        html_doc += "<p><br>Type text here</p>"
+        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(request.args.get('id'))
+        return html_doc
+
+    def sendReplyRequestCallback(self):
+        html_doc = "<p> You've replied successfully</p"
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Back to ticket overview"> </form>'
+        # Send reply to Telegram bot
+        currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
+        response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
+                    "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
+                    "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
+                    "message": request.args.get('message')}
+        self.processedRequests.append(response)
+
+        # Reduce count of pending emails for assignee
+        all_employees = {}
+        for key in self.employees:
+            all_employees.update(self.employees[key])
+        for key in self.employees:
+            if currentRequest["output"]["assignee"] in self.employees[key].keys():
+                self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
+                break
+        # Update database
+        currentRequest["output"]["assignee"] = "done"
+
+
+        return html_doc
 
     def serviceWorkerProcessing(self):
         html_doc = ""
@@ -187,10 +233,18 @@ if __name__ == "__main__":
         '/web/login', view_func=customerSupport.loginCallback)
     flaskApp.add_url_rule(
         '/web/logout', view_func=customerSupport.logoutCallback)
+    flaskApp.add_url_rule(
+        '/web/reply', view_func=customerSupport.replyRequestCallback)
+    flaskApp.add_url_rule(
+        '/web/send_reply', view_func=customerSupport.sendReplyRequestCallback)
+
+    @flaskApp.errorhandler(404)
+    def page_not_found(e):
+        return "page not found", 404
 
     # Debugging, remove later
-    customerSupport.populateDebugSupportRequests()
-    customerSupport.populateDebugProcessedRequests()
+    #customerSupport.populateDebugSupportRequests()
+    #customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
-    flaskApp.run(debug=True)  # blocking
+    flaskApp.run(debug=False, port=80)  # blocking

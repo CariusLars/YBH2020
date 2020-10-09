@@ -1,19 +1,20 @@
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
-import nltk
 from nltk.corpus import stopwords
+import nltk
 
 from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
 
-path = 'google_credentials.json' 
+path = 'google_credentials.json'
 client = language.LanguageServiceClient.from_service_account_json(path)
 
 nltk.download('stopwords')
-stop_words=set(stopwords.words("german"))
 df_top10 = pd.read_excel('top_10_words.xls')
+
+stop_words=set(stopwords.words("german"))
 
 def preprocess(text):
     text = text.lower()
@@ -24,10 +25,12 @@ def preprocess(text):
 
 def get_score(tokens):
     score = dict.fromkeys(df_top10.columns, 0)
+    #print(list(df_top10.index))
     for j in df_top10.columns:
         for l, l_in in zip(list(df_top10[j]), list(df_top10.index)):
             if l in tokens:
                 score[j] += 10-l_in
+                #print(l_in)
     category = (max(score, key=score.get))
     score = score[max(score, key=score.get)]
     return score, category
