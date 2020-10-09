@@ -15,7 +15,11 @@ class BotHandler:
         method = 'getUpdates'
         params = {'timeout': timeout, 'offset': offset}
         resp = requests.get(self.api_url + method, params)
-        result_json = resp.json()['result']
+        result_json = None
+        try:
+            result_json = resp.json()['result']
+        except:
+            pass
         return result_json
 
     def send_message(self, chat_id, text):
@@ -27,15 +31,18 @@ class BotHandler:
     def get_last_update(self):
         get_result = self.get_updates()
         # print(get_result)
+        if get_result is not None:
 
-        if len(get_result) > 0:
-            last_update = get_result[-1]
-        elif len(get_result) == 0:
-            last_update = None
+            if len(get_result) > 0:
+                last_update = get_result[-1]
+            elif len(get_result) == 0:
+                last_update = None
+            else:
+                last_update = get_result[len(get_result)]
+
+            return last_update
         else:
-            last_update = get_result[len(get_result)]
-
-        return last_update
+            return None
 
 
 customerServiceBot = BotHandler(
@@ -102,7 +109,7 @@ def main():
                 #crmBot.send_message(agent, "Antwort an:" + user_link, parse_mode = "Markdown")
                 new_id = random.randint(0, 9999999999)
                 r = requests.post(backend_addr + '/customerRequestCallback', {
-                                  "id": new_id, "timestamp": now, "message": last_chat_text, "user_name": last_chat_name, "contact_details": last_chat_id})
+                                  "id": new_id, "timestamp": now.strftime("%d.%m.%Y, %H:%M"), "message": last_chat_text, "user_name": last_chat_name, "contact_details": last_chat_id})
                 # print(r)
                 request_ids.append(new_id)
 

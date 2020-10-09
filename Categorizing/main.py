@@ -140,10 +140,36 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
-        msg = "Replying to service request from "
-        msg += request.args.get('id')
-        return msg
-        # TODO(jan) make reply mask with reply button
+        html_doc = "<p>Replying to service request from "
+        html_doc += request.args.get('id') + "</p"
+        html_doc += "<p><br>Type text here</p>"
+        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(request.args.get('id'))
+        return html_doc
+
+    def sendReplyRequestCallback(self):
+        html_doc = "<p> You've replied successfully</p"
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Back to ticket overview"> </form>'
+        # Send reply to Telegram bot
+        currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
+        response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
+                    "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
+                    "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
+                    "message": request.args.get('message')}
+        self.processedRequests.append(response)
+
+        # Reduce count of pending emails for assignee
+        all_employees = {}
+        for key in self.employees:
+            all_employees.update(self.employees[key])
+        for key in self.employees:
+            if currentRequest["output"]["assignee"] in self.employees[key].keys():
+                self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
+                break
+        # Update database
+        currentRequest["output"]["assignee"] = "done"
+
+
+        return html_doc
 
     def serviceWorkerProcessing(self):
         html_doc = ""
@@ -205,10 +231,14 @@ if __name__ == "__main__":
         '/web/login', view_func=customerSupport.loginCallback)
     flaskApp.add_url_rule(
         '/web/logout', view_func=customerSupport.logoutCallback)
+    flaskApp.add_url_rule(
+        '/web/reply', view_func=customerSupport.replyRequestCallback)
+    flaskApp.add_url_rule(
+        '/web/send_reply', view_func=customerSupport.sendReplyRequestCallback)
 
     # Debugging, remove later
-    customerSupport.populateDebugSupportRequests()
-    customerSupport.populateDebugProcessedRequests()
+    #customerSupport.populateDebugSupportRequests()
+    #customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=True)  # blocking
