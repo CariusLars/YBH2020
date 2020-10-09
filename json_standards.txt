@@ -1,0 +1,10 @@
+input = {'timestamp': datetime,
+         'message': str,
+         'user_name': str}
+output = {'timestamp': datetime,
+         'message': str,
+         'user_name': str,
+         'sentiment': float,
+         'sentiment_prob': float,
+         'categories': [strs],
+         'categories_prob': [floats]}
