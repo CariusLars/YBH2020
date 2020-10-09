@@ -1,6 +1,8 @@
+import pandas as pd
 import pickle
 
 import ParseMails
+import Utils
 
 name = 'blacklist'
 
@@ -27,5 +29,20 @@ def blacklist():
     do_pickle(black)
 
 
+def wordcounts():
+    faqs = './../data/qa_data.xlsx'
+    data = pd.read_excel(faqs)
+    words = {}
+    for dpoint in data['Content']:
+        words_in_dp = Utils.str_to_words(dpoint)
+        for w in words_in_dp:
+            if w not in words:
+                words[w] = 1
+            else:
+                words[w] += 1
+    do_pickle(words, n='wordcounts_faq')
+    return words
+
+
 if __name__ == '__main__':
-    blacklist()
+    wordcounts()

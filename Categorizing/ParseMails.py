@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import random
 import re
+import Utils
 
 DWB_XLXS = './../data/Mails.xlsx'
 RANDOM_NAMES = './../data/random_names.txt'
@@ -20,7 +21,7 @@ def as_json(unique_content=False):
         names = ntxt.read().split()
     content = ''
     for i, row in raw.iterrows():
-        mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': ''},
+        mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': '', 'id': None},
                 'output': {'timestamp': None, 'sentiment': [], 'semtiment_prob': None, 'categories': '',
                            'categories_prob': [], 'assignee': '', 'answers': []}}
         try:
@@ -78,10 +79,7 @@ def count_occurences(series):
     for row in series:
         if pd.isna(row):
             continue
-        txt = re.split(' |\n|\\.|/', row)
-        # Split the words in the mail, delete punctiation and delete words that are actually only punctuation
-        # We ignore upper/lower case
-        txt = [t.strip().lower() for t in txt if not re.fullmatch('[ ,.]*', t)]
+        txt = Utils.str_to_words(row)
         for word in txt:
             if word in words:
                 words[word] += 1
@@ -92,4 +90,4 @@ def count_occurences(series):
 
 
 if __name__ == '__main__':
-    as_json()
+    parse()
