@@ -6,9 +6,35 @@ requires xlrd package!
 from copy import deepcopy
 import numpy as np
 import pandas as pd
+import random
 import re
 
 DWB_XLXS = './../data/Mails.xlsx'
+RANDOM_NAMES = './../data/random_names.txt'
+
+
+def as_json(unique_content=False):
+    raw = parse_xlsx(DWB_XLXS)
+    ret = []
+    with open(RANDOM_NAMES, 'r') as ntxt:
+        names = ntxt.read().split()
+    content = ''
+    for i, row in raw.iterrows():
+        mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': ''},
+                'output': {'timestamp': None, 'sentiment': [], 'semtiment_prob': None, 'categories': '',
+                           'categories_prob': [], 'assignee': '', 'answers': []}}
+        try:
+            if unique_content:
+                if content == row['Mail']:
+                    continue  # Avoid duplicate messages with different categories
+            content = row['Mail']
+            mail['input']['message'] = 'Betreff: ' + row['Betreff'] + '\n' + content
+            mail['input']['user_name'] = random.choice(names)  # Our ground truth is anonymized
+            ret.append(mail)
+        except TypeError:
+            pass  # Ignore rows in wrong format
+
+    return raw
 
 
 def parse():
@@ -16,7 +42,6 @@ def parse():
     print("Loaded excel, here is an overview:\n", dwv_df.describe())
     unique = dwv_df['Kategorie'].unique()
     print("{} Unique Categories in the data:\n".format(len(unique)), unique)
-    dwf_dict = dwv_df.to_dict()
     # mail_wordcount = count_occurences(dwv_df['Mail'])
     tops = top_words(dwv_df[['Mail', 'Betreff', 'Kategorie']])
     return tops
@@ -67,4 +92,4 @@ def count_occurences(series):
 
 
 if __name__ == '__main__':
-    parse()
+    as_json()
