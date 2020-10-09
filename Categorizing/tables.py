@@ -1,5 +1,5 @@
 # Declare your table
-from flask_table import Table, Col
+from flask_table import Table, Col, LinkCol, ButtonCol
 
 
 class SupportItemTable(Table):
@@ -12,5 +12,10 @@ class SupportItemTable(Table):
     out_sentiment = Col('Sentiment', attr_list=['output', 'sentiment'])
     out_assignee = Col('Assignee', attr_list=['output', 'assignee'])
     out_answers = Col('Answers', attr_list=['output', 'answers'])
+
+    # actions = LinkCol('View', 'delete_fn')  # , url_kwargs=dict(id='id'))
+    action_del = ButtonCol('Delete', 'deleteRequestCallback',
+                           url_kwargs=dict(id=['input', 'user_name']))
+
     # name = Col('Name')
     # topic = Col('Topic')
