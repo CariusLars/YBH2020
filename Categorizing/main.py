@@ -8,6 +8,7 @@ import datetime
 import ParseMails
 import pandas as pd
 import nlp
+import SimilarityScore
 
 
 class CustomerSupport(object):
@@ -63,6 +64,13 @@ class CustomerSupport(object):
         request["output"]["category"] = resultDict["category"]
         request["output"]["category_score"] = resultDict["category_score"]
         request["output"]["extreme_negative"] = resultDict["extreme_negative"]
+
+        # Calculate most probable FAQs
+        if resultDict["category_score"] > 4:
+            category_only = resultDict["category"]
+        else:
+            category_only = none
+        print(SimilarityScore.calculate(request["input"]["message"], 3, category_only))
 
         self.assignRequest(requestID)
         # print(self.supportRequests)
