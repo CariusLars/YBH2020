@@ -36,15 +36,19 @@ crmAgents=["266433173"]#, "84983156"] # Lars, Jan
 
 greetings = ('hallo', 'guten tag', 'guten morgen', 'guten nachmittag', 'hi', 'servus', 'grüzi', 'gruezi','guten abend')
 responses = ('ok', 'danke', 'alles klar', 'super')
-now = datetime.datetime.now()
+
+request_ids = []
 
 def main():
     new_offset = None
-    today = now.day
-    hour = now.hour
-    readableDateTime = now.strftime("%d.%m.%Y, %H:%M")
 
     while True:
+        ### Step 1: Process incoming customer requests ###
+        now = datetime.datetime.now()
+        today = now.day
+        hour = now.hour
+        readableDateTime = now.strftime("%d.%m.%Y, %H:%M")
+
         customerServiceBot.get_updates(new_offset)
 
         last_update = customerServiceBot.get_last_update()
@@ -53,7 +57,7 @@ def main():
         last_chat_text = last_update['message']['text']
         last_chat_id = last_update['message']['chat']['id']
         last_chat_name = last_update['message']['chat']['first_name']
-        print(last_update['message'])
+        #print(last_update['message'])
         #print(last_update.message.from_user.username)
 
         #print(last_chat_text)
@@ -75,18 +79,23 @@ def main():
             # Distribute message to one of the agens TODO: include logic here
             # user_link = "[" + last_chat_name + "](tg://user?id=" + str(last_chat_id) + ")" # Markdown link to the user
 
-            for agent in crmAgents:
-                crmBot.send_message(agent, 'Kundenanfrage\nZeitstemepel: {}\nKunde: {}\nInhalt: {}'.format(readableDateTime, last_chat_name, last_chat_text))
+            #for agent in crmAgents:
+            #    crmBot.send_message(agent, 'Kundenanfrage\nZeitstemepel: {}\nKunde: {}\nInhalt: {}'.format(readableDateTime, last_chat_name, last_chat_text))
                 #crmBot.send_message(agent, "Antwort an:" + user_link, parse_mode = "Markdown")
 
-            r = requests.post('http://127.0.0.1:5000/customerRequestCallback', {"key": "value"})
-            print(r.status_code)
+            r = requests.post('http://127.0.0.1:5000/customerRequestCallback', {"timestamp": now, "message" : last_chat_text, "user_name" : last_chat_name, "contact_details" : last_chat_id})
+            print(r)
+            request_ids.append(last_chat_id)
         else:
             customerServiceBot.send_message(last_chat_id,
                                             'Bitte senden Sie Ihre Anfrage in einer Nachricht, um eine schnellstmögliche Bearbeitung zu ermöglichen')
         new_offset = last_update_id + 1
 
-        #print(last_chat_id)
+        ### Step 2: Process and redistribute analyzed customer requests ###
+        for request_id in request_ids:
+            #get request
+            a=0
+
 
 if __name__ == '__main__':
     try:
