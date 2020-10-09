@@ -123,8 +123,9 @@ def main():
                 backend_addr + "/checkProcessedRequestsCallback", params=payload)
             result = resp.json()
             if result:  # True if requested customer ID is in the processed request database
-                customerServiceBot.send_message(result['contact_details'],
-                                                'Hallo {},\nwir Antworten auf Ihre Serviceanfrage vom {}.\n{}\n---\nMit freundlichen Grüßen,\n{} vom ewb Kundenservice'.format(result["user_name"], result['timestamp_request'], result['message'], result['assignee']))
+                if "@" not in result['contact_details']:
+                    customerServiceBot.send_message(result['contact_details'],
+                                                    'Hallo {},\nwir Antworten auf Ihre Serviceanfrage vom {}.\n{}\n---\nMit freundlichen Grüßen,\n{} vom ewb Kundenservice'.format(result["user_name"], result['timestamp_request'], result['message'], result['assignee']))
                 request_ids.remove(request_id)
 
 

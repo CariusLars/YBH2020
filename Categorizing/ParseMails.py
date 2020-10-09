@@ -21,21 +21,24 @@ def as_json(unique_content=False):
         names = ntxt.read().split()
     content = ''
     for i, row in raw.iterrows():
-        mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': '', 'id': None},
-                'output': {'timestamp': None, 'sentiment': [], 'semtiment_prob': None, 'category': '',
-                           'categories_score': None, 'assignee': '', 'answers': []}}
+        mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': '', 'id': -1},
+                'output': {'timestamp': None, 'extreme_negative': False, 'category': '',
+                           'category_score': None, 'assignee': '', 'answers': []}}
         try:
             if unique_content:
                 if content == row['Mail']:
                     continue  # Avoid duplicate messages with different categories
             content = row['Mail']
             mail['input']['message'] = 'Betreff: ' + row['Betreff'] + '\n' + content
-            mail['input']['user_name'] = random.choice(names)  # Our ground truth is anonymized
+            username = random.choice(names)
+            mail['input']['user_name'] = username  # Our ground truth is anonymized
+            mail['input']['contact_details'] = str(username + '@half.a.chicken.ch')
+            mail['input']['id'] = random.randint(0, 2**16-1)
             ret.append(mail)
         except TypeError:
             pass  # Ignore rows in wrong format
 
-    return raw
+    return ret
 
 
 def parse():
@@ -90,4 +93,4 @@ def count_occurences(series):
 
 
 if __name__ == '__main__':
-    parse()
+    as_json()
