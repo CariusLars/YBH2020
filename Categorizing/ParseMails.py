@@ -11,15 +11,25 @@ import re
 DWB_XLXS = './../data/Mails.xlsx'
 
 
-def main():
+def parse():
     dwv_df = parse_xlsx(DWB_XLXS)
     print("Loaded excel, here is an overview:\n", dwv_df.describe())
     unique = dwv_df['Kategorie'].unique()
     print("{} Unique Categories in the data:\n".format(len(unique)), unique)
     dwf_dict = dwv_df.to_dict()
-    # Do whatever you want with that
-    mail_wordcount = count_occurences(dwv_df['Mail'])
-    return dwv_df, dwf_dict
+    # mail_wordcount = count_occurences(dwv_df['Mail'])
+    tops = top_words(dwv_df[['Mail', 'Betreff', 'Kategorie']])
+    return tops
+
+
+def top_words(df):
+    top = {}
+    for col in df.columns:
+        sorted_list = count_occurences(df[col])
+        top[col] = {word: i for i, (_, word) in enumerate(sorted_list)}
+    return top
+
+# Internet und TV ist ganze Schweiz, Strom und Glasfaser nicht. Zzev ist auch schweiz-weit
 
 
 def parse_xlsx(fpath):
@@ -41,7 +51,9 @@ def count_occurences(series):
     """Dont use this, return will change!"""
     words = {}
     for row in series:
-        txt = re.split(' |\n|\\.', row)
+        if pd.isna(row):
+            continue
+        txt = re.split(' |\n|\\.|/', row)
         # Split the words in the mail, delete punctiation and delete words that are actually only punctuation
         # We ignore upper/lower case
         txt = [t.strip().lower() for t in txt if not re.fullmatch('[ ,.]*', t)]
@@ -51,8 +63,8 @@ def count_occurences(series):
             else:
                 words[word] = 0
     wordlist_sorted = sorted([(count, word) for word, count in words.items()], reverse=True)
-    return words, wordlist_sorted
+    return wordlist_sorted
 
 
 if __name__ == '__main__':
-    main()
+    parse()
