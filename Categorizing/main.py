@@ -3,11 +3,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 from tables import SupportItemTable
 import os
+import json
 
 
 class CustomerSupport(object):
     def __init__(self):
-        pass
+        self.supportRequests = []
 
     # Serving a normal HTTP GET request (e.g., from browser, port 80)
     # @flaskApp.route("/")
