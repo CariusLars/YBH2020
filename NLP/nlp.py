@@ -1,6 +1,8 @@
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
+from nltk.corpus import stopwords
+import nltk
 
 from google.cloud import language
 from google.cloud.language import enums
@@ -12,6 +14,8 @@ client = language.LanguageServiceClient.from_service_account_json(path)
 nltk.download('stopwords')
 df_top10 = pd.read_excel('top_10_words.xls')
 
+stop_words=set(stopwords.words("german"))
+
 def preprocess(text):
     text = text.lower()
     text = text.replace(r'[^\w\s]+', '')
@@ -21,10 +25,12 @@ def preprocess(text):
 
 def get_score(tokens):
     score = dict.fromkeys(df_top10.columns, 0)
-    for j, j_in in zip(df_top10.columns, list(df_top10.index)):
-        for l in df_top10[j]:
+    print(list(df_top10.index))
+    for j in df_top10.columns:
+        for l, l_in in zip(list(df_top10[j]), list(df_top10.index)):
             if l in tokens:
-                score[j] += 10-j_in
+                score[j] += 10-l_in
+                print(l_in)
     category = (max(score, key=score.get))
     score = score[max(score, key=score.get)]
     return score, category
@@ -47,4 +53,4 @@ def google_sentiment(text):
 def packaged_results(id, timestamp, message, user_name, contact_details):  #user_id, etc just given as examples
     category_score, category = get_score(preprocess(message))
     extreme_negative = google_sentiment(message)
-    return {'id':id, 'timestamp':timestamp,'user_name':user_name, 'message': message, 'category': category, 'category_score': score, 'extreme_negative': extreme_negative}
+    return {'id':id, 'timestamp':timestamp,'user_name':user_name, 'message': message, 'category': category, 'category_score': category_score, 'extreme_negative': extreme_negative}
