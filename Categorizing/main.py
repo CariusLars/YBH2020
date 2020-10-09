@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask, request, jsonify, send_from_directory
+from tables import SupportItemTable
 import os
 
 
@@ -36,8 +37,13 @@ class CustomerSupport(object):
         pass
         # TODO(jan)
 
-    def customerSupportOverview(self):
-        pass
+    def generateHtmlTableAllRequests(self):
+        # return "generateHtmlTableAll"
+        items = [dict(name='Name1', topic='Topic1'),
+                 dict(name='Name2', topic='Topic2'),
+                 dict(name='Name3', topic='Topic3')]
+        table = SupportItemTable(items)
+        return table.__html__()
 
 
 if __name__ == "__main__":
@@ -55,6 +61,8 @@ if __name__ == "__main__":
                           view_func=customerSupport.hello_world)
     flaskApp.add_url_rule('/web/<path:path>',
                           view_func=customerSupport.webServeFromDirectory)
+    flaskApp.add_url_rule('/web/generateHtmlTableAllRequests',
+                          view_func=customerSupport.generateHtmlTableAllRequests)
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=True)  # blocking
