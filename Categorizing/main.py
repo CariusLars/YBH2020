@@ -4,11 +4,13 @@ from flask import Flask, request, jsonify, send_from_directory
 from tables import SupportItemTable
 import os
 import json
+import datetime
 
 
 class CustomerSupport(object):
     def __init__(self):
         self.supportRequests = []
+        self.processedRequests = []
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -41,8 +43,22 @@ class CustomerSupport(object):
         pass
         # TODO(jan)
 
-    def respondToCustomer(self, respondJson):
-        pass
+    def populateDebugProcessedRequests(self):
+        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply":-1, "contact_details": "266433173", "user_name": "Lars", "assignee":"Halbes Hähnchen", "message":"Nicht so schlimm, wir liefern schnell eine Neue!"}
+        self.processedRequests.append(response)
+
+    def checkProcessedRequestsCallback(self):
+        print("called checkProcessedRequestsCallback")
+        user_id =request.args.get('request_id')
+
+        returnElements = [processedRequest for processedRequest in self.processedRequests if processedRequest['contact_details'] == user_id]
+        print(self.processedRequests)
+        print(returnElements)
+
+        if len(returnElements) > 0:
+            return returnElements[-1]
+        else:
+            return {}
 
     def generateHtmlTableAllRequests(self):
         table = SupportItemTable(self.supportRequests)
@@ -60,6 +76,8 @@ if __name__ == "__main__":
     # to test: curl --data "param1=value1&param2=value2&foo=123{a:b, c:d}&otherData=blub" 127.0.0.1:5000/customerRequestCallback
     flaskApp.add_url_rule('/customerRequestCallback',
                           methods=['POST'], view_func=customerSupport.customerRequestCallback)
+    flaskApp.add_url_rule('/checkProcessedRequestsCallback',
+                          methods=['GET'], view_func=customerSupport.checkProcessedRequestsCallback)
     flaskApp.add_url_rule('/customerSupport',
                           view_func=customerSupport.hello_world)
     flaskApp.add_url_rule('/web/<path:path>',
@@ -69,6 +87,7 @@ if __name__ == "__main__":
 
     # Debugging, remove later
     customerSupport.populateDebugSupportRequests()
+    customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=True)  # blocking
