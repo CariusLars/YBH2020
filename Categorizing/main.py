@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask, request, jsonify, send_from_directory
-from tables import SupportItemTable
+from tables import SupportItemTableView, SupportItemTableEdit
 import os
 import json
 import datetime
@@ -69,14 +69,23 @@ class CustomerSupport(object):
         else:
             return {}
 
-    def generateHtmlTableAllRequests(self):
-        table = SupportItemTable(self.supportRequests)
-        return table.__html__()
+    def generateHtmlTableAllRequestsView(self):
+        html_doc = ""
+        html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Refresh"> </form>'
+        table = SupportItemTableView(self.supportRequests)
+        html_doc += table.__html__()
+        return html_doc
 
     def deleteRequestCallback(self):
         msg = "Deleted service request from "
         msg += request.args.get('id')
         return msg
+
+    def replyRequestCallback(self):
+        msg = "Replying to service request from "
+        msg += request.args.get('id')
+        return msg
+        # TODO(jan) make reply mask with reply button
 
     def serviceWorkerProcessing(self):
         html_doc = ""
@@ -90,18 +99,22 @@ class CustomerSupport(object):
             html_doc += 'The following tickets have been assigned to you:<br>'
             filteredSupportRequests = [
                 supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["assignee"] == self.loginName]
-            table = SupportItemTable(filteredSupportRequests)
+            table = SupportItemTableEdit(filteredSupportRequests)
             html_doc += table.__html__()
 
         return html_doc
 
     def loginCallback(self):
         self.loginName = request.args.get('name')
-        return "Successfully logged in as " + self.loginName
+        html_doc = "Successfully logged in as " + self.loginName
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Let\'s get to work!"> </form>'
+        return html_doc
 
     def logoutCallback(self):
         self.loginName = None
-        return "Successfully logged out"
+        html_doc = "Successfully logged out"
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Goodbye!"> </form>'
+        return html_doc
 
 
 if __name__ == "__main__":
@@ -120,10 +133,12 @@ if __name__ == "__main__":
                           view_func=customerSupport.hello_world)
     flaskApp.add_url_rule('/web/<path:path>',
                           view_func=customerSupport.webServeFromDirectory)
-    flaskApp.add_url_rule('/web/generateHtmlTableAllRequests',
-                          view_func=customerSupport.generateHtmlTableAllRequests)
+    flaskApp.add_url_rule('/web/generateHtmlTableAllRequestsView',
+                          view_func=customerSupport.generateHtmlTableAllRequestsView)
     flaskApp.add_url_rule(
         '/delete', methods=['POST'], view_func=customerSupport.deleteRequestCallback)
+    flaskApp.add_url_rule(
+        '/reply', methods=['POST'], view_func=customerSupport.replyRequestCallback)
     flaskApp.add_url_rule('/web/serviceWorkerProcessing',
                           view_func=customerSupport.serviceWorkerProcessing)
     flaskApp.add_url_rule(
