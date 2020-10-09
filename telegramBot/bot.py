@@ -40,12 +40,11 @@ crmAgents=["266433173"]#, "84983156"] # Lars, Jan
 greetings = ('hallo', 'guten tag', 'guten morgen', 'guten nachmittag', 'hi', 'servus', 'grüzi', 'gruezi','guten abend')
 responses = ('ok', 'danke', 'alles klar', 'super')
 
-request_ids = []
-
 backend_addr = "http://127.0.0.1:5000"
 
 def main():
     new_offset = None
+    request_ids = []
 
     while True:
         ### Step 1: Process incoming customer requests ###
@@ -93,6 +92,12 @@ def main():
                 r = requests.post(backend_addr + '/customerRequestCallback', {"timestamp": now, "message" : last_chat_text, "user_name" : last_chat_name, "contact_details" : last_chat_id})
                 #print(r)
                 request_ids.append(last_chat_id)
+
+            elif last_chat_text.lower() == "reset_bot":
+                request_ids = []
+                new_offset = None
+                customerServiceBot.send_message(last_chat_id,
+                                                'ewb Customer Service Bot wurde erfoglreich zurückgesetzt')
             else:
                 customerServiceBot.send_message(last_chat_id,
                                                 'Bitte senden Sie Ihre Anfrage in einer Nachricht, um eine schnellstmögliche Bearbeitung zu ermöglichen')
