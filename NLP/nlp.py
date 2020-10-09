@@ -26,6 +26,7 @@ def get_score(tokens):
             if l in tokens:
                 score[j] += 10-j_in
     category = (max(score, key=score.get))
+    score = score[max(score, key=score.get)]
     return score, category
 
 def google_sentiment(text):
@@ -37,11 +38,13 @@ def google_sentiment(text):
     annotations = client.analyze_sentiment(document=document)
     score = annotations.document_sentiment.score
     magnitude = annotations.document_sentiment.magnitude
-    if score > 2 & magnitude > 4:
+    if (score > 2.) & (magnitude > 4.):
         ex_negative = True
+    else:
+        ex_negative = False
     return ex_negative
 
-def packaged_results(text, user_id, etc):  #user_id, etc just given as examples
-    score, category = get_score(preprocess(text))
-    ex_negative = google_sentiment(text)
-    return {'user_id':user_id, 'text': text, 'category': category, 'score': score, 'ex_negative': ex_negative}
+def packaged_results(timestamp, message, user_name, contact_details):  #user_id, etc just given as examples
+    category_score, category = get_score(preprocess(message))
+    extreme_negative = google_sentiment(message)
+    return {'timestamp':timestamp,'user_name':user_name, 'message': message, 'category': category, 'category_score': score, 'extreme_negative': extreme_negative}
