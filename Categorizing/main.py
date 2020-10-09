@@ -71,9 +71,11 @@ class CustomerSupport(object):
         return html_doc
 
     def deleteRequestCallback(self):
-        msg = "Deleted service request from "
-        msg += request.args.get('id')
-        return msg
+        html_doc = "Deleted service request from " + request.args.get('id')
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Return"> </form>'
+        self.supportRequests = [
+            item for item in self.supportRequests if item["input"]["user_name"] != request.args.get('id')]
+        return html_doc
 
     def replyRequestCallback(self):
         msg = "Replying to service request from "
@@ -130,9 +132,9 @@ if __name__ == "__main__":
     flaskApp.add_url_rule('/web/generateHtmlTableAllRequestsView',
                           view_func=customerSupport.generateHtmlTableAllRequestsView)
     flaskApp.add_url_rule(
-        '/delete', methods=['POST'], view_func=customerSupport.deleteRequestCallback)
+        '/web/delete', methods=['POST'], view_func=customerSupport.deleteRequestCallback)
     flaskApp.add_url_rule(
-        '/reply', methods=['POST'], view_func=customerSupport.replyRequestCallback)
+        '/web/reply', methods=['POST'], view_func=customerSupport.replyRequestCallback)
     flaskApp.add_url_rule('/web/serviceWorkerProcessing',
                           view_func=customerSupport.serviceWorkerProcessing)
     flaskApp.add_url_rule(
