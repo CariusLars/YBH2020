@@ -22,10 +22,9 @@ class CustomerSupport(object):
         #print(self.employees)
 
     def populateDebugSupportRequests(self):
-        req = {"input": {"id": 1, "timestamp": 1, "message": "My internet is leaking",
-                         "user_name": "Bob the builder", "contact_details": "bob@builder.com"},
-               "output": {"timestamp": 2, "extreme_negative": False, "category":"Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
-        self.supportRequests.append(req)
+        req = {"input": {"timestamp": 1, "message": "My internet is leaking",
+                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
+               "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
 
     def sendAllMailRequests(self):
         list_of_mails = ParseMails.as_json(unique_content=True)
