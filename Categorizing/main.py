@@ -7,6 +7,7 @@ import json
 import datetime
 import ParseMails
 import pandas as pd
+import nlp
 
 
 class CustomerSupport(object):
@@ -48,22 +49,35 @@ class CustomerSupport(object):
                           "output": {"timestamp": -1, "extreme_negative": False, "category": None, "category_score": 0, "assignee": "", "answers": []}}
 
         self.supportRequests.append(serviceRequest)
-        # analyzeRequest(serviceRequest)
+
+        self.analyzeRequest(serviceRequest["input"]["id"])
         return 'Received the request!\n'  # response to your request.
 
-    def analyzeRequest(self, requestJson):
-        pass
+    def analyzeRequest(self, requestID):
+        #print(self.supportRequests)
+        request = [request for request in self.supportRequests if request["input"]["id"] == requestID][0]
+        resultDict = nlp.packaged_results(request["input"]["id"], request["input"]["timestamp"], request["input"]["message"], request["input"]["user_name"], request["input"]["contact_details"])
+        request["output"]["category"] = resultDict["category"]
+        request["output"]["category_score"] = resultDict["category_score"]
+        request["output"]["extreme_negative"] = resultDict["extreme_negative"]
+
+        self.assignRequest(requestID)
+        #print(self.supportRequests)
+        #print(request)
+        #print(resultDict)
         # TODO(jonathan,chris); call assingRequest afterwards
 
+
     def assignRequest(self, requestID):
-        thresholdUncertainCategory = 4
+        thresholdUncertainCategory = -1
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
-        request = [request for request in self.processedRequests if request["input"]
-                   ["id"] == contactDetailsString][0]
+        request = [request for request in self.supportRequests if request["input"]
+                   ["id"] == requestID][0]
 
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
+            print("Diverse request. Category {}, Score {}".format(request["output"]["category"], request["output"]["category_score"]))
             # Get employee with least emails to process
             all_employees = {}
             for key in self.employees:
@@ -86,9 +100,11 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
+        print("supportRequests:")
+        print(self.supportRequests)
 
     def populateDebugProcessedRequests(self):
-        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
+        response = {"id":1234,"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
                     "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
         self.processedRequests.append(response)
 
@@ -98,8 +114,8 @@ class CustomerSupport(object):
 
         returnElements = [
             processedRequest for processedRequest in self.processedRequests if processedRequest['id'] == id]
-        print(self.processedRequests)
-        print(returnElements)
+        #print(self.processedRequests)
+        #print(returnElements)
 
         if len(returnElements) > 0:
             return returnElements[-1]
