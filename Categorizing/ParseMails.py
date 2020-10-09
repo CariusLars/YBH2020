@@ -30,7 +30,9 @@ def as_json(unique_content=False):
                     continue  # Avoid duplicate messages with different categories
             content = row['Mail']
             mail['input']['message'] = 'Betreff: ' + row['Betreff'] + '\n' + content
-            mail['input']['user_name'] = random.choice(names)  # Our ground truth is anonymized
+            username = random.choice(names)
+            mail['input']['user_name'] = username  # Our ground truth is anonymized
+            mail['input']['contact_details'] = str(username + '@half.a.chicken.ch')
             mail['input']['id'] = random.randint(0, 2**16-1)
             ret.append(mail)
         except TypeError:
