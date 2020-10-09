@@ -25,10 +25,13 @@ class CustomerSupport(object):
 
     def customerRequestCallback(self):
         # TODO(lars)
-        print("called customerRequestCallback()")
+        #print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
-        print(request.form)
-        # TODO(lars) call analyzeRequest
+        serviceRequest = {"input": request.form.to_dict(),
+               "output": {"timestamp": -1, "sentiment": [], "sentiment_prob": [], "categories": [], "categories_prob": [], "assignee": "", "answers": []}}
+
+        self.supportRequests.append(serviceRequest)
+        #analyzeRequest(serviceRequest)
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestJson):
@@ -38,6 +41,9 @@ class CustomerSupport(object):
     def assignRequest(self, requestJson):
         pass
         # TODO(jan)
+
+    def respondToCustomer(self, respondJson):
+        pass
 
     def generateHtmlTableAllRequests(self):
         items = [dict(name='Name1', topic='Topic1'),
