@@ -32,12 +32,12 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip
 
-RUN pip3 install pandas flask flask_table xlrd
+RUN pip3 install pandas flask flask_table xlrd requests
 
 #==
 # Copy private git repos from intermediate image
 #==
 COPY --from=intermediate  /git/YBH2020 YBH2020
 
-WORKDIR YBH2020/Categorizing
-CMD ["/YBH2020/Categorizing/main.py"]
+WORKDIR YBH2020
+CMD ["/YBH2020/deploy.sh"]
