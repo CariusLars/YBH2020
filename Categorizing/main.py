@@ -66,6 +66,7 @@ class CustomerSupport(object):
     def generateHtmlTableAllRequestsView(self):
         html_doc = ""
         html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Refresh"> </form>'
+        html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Load Email Requests"> </form>'
         table = SupportItemTableView(self.supportRequests)
         html_doc += table.__html__()
         return html_doc
@@ -131,6 +132,8 @@ if __name__ == "__main__":
                           view_func=customerSupport.webServeFromDirectory)
     flaskApp.add_url_rule('/web/generateHtmlTableAllRequestsView',
                           view_func=customerSupport.generateHtmlTableAllRequestsView)
+    flaskApp.add_url_rule('/web/loadEmailRequests',
+                          view_func=customerSupport.sendAllMailRequests)
     flaskApp.add_url_rule(
         '/web/delete', methods=['POST'], view_func=customerSupport.deleteRequestCallback)
     flaskApp.add_url_rule(
