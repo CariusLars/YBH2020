@@ -7,7 +7,7 @@ import json
 import datetime
 import ParseMails
 import pandas as pd
-# import nlp
+import nlp
 
 
 class CustomerSupport(object):
@@ -51,7 +51,7 @@ class CustomerSupport(object):
 
         self.supportRequests.append(serviceRequest)
 
-        # self.analyzeRequest(serviceRequest["input"]["id"])
+        self.analyzeRequest(serviceRequest["input"]["id"])
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestID):
@@ -249,7 +249,7 @@ if __name__ == "__main__":
         return "page not found", 404
 
     # Debugging, remove later
-    customerSupport.populateDebugSupportRequests()
+    # customerSupport.populateDebugSupportRequests()
     # customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
