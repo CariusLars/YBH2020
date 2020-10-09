@@ -54,19 +54,20 @@ class CustomerSupport(object):
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestID):
-        #print(self.supportRequests)
-        request = [request for request in self.supportRequests if request["input"]["id"] == requestID][0]
-        resultDict = nlp.packaged_results(request["input"]["id"], request["input"]["timestamp"], request["input"]["message"], request["input"]["user_name"], request["input"]["contact_details"])
+        # print(self.supportRequests)
+        request = [
+            request for request in self.supportRequests if request["input"]["id"] == requestID][0]
+        resultDict = nlp.packaged_results(request["input"]["id"], request["input"]["timestamp"],
+                                          request["input"]["message"], request["input"]["user_name"], request["input"]["contact_details"])
         request["output"]["category"] = resultDict["category"]
         request["output"]["category_score"] = resultDict["category_score"]
         request["output"]["extreme_negative"] = resultDict["extreme_negative"]
 
         self.assignRequest(requestID)
-        #print(self.supportRequests)
-        #print(request)
-        #print(resultDict)
+        # print(self.supportRequests)
+        # print(request)
+        # print(resultDict)
         # TODO(jonathan,chris); call assingRequest afterwards
-
 
     def assignRequest(self, requestID):
         thresholdUncertainCategory = -1
@@ -77,7 +78,8 @@ class CustomerSupport(object):
 
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
-            print("Diverse request. Category {}, Score {}".format(request["output"]["category"], request["output"]["category_score"]))
+            print("Diverse request. Category {}, Score {}".format(
+                request["output"]["category"], request["output"]["category_score"]))
             # Get employee with least emails to process
             all_employees = {}
             for key in self.employees:
@@ -104,7 +106,7 @@ class CustomerSupport(object):
         print(self.supportRequests)
 
     def populateDebugProcessedRequests(self):
-        response = {"id":1234,"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
+        response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
                     "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
         self.processedRequests.append(response)
 
@@ -114,8 +116,8 @@ class CustomerSupport(object):
 
         returnElements = [
             processedRequest for processedRequest in self.processedRequests if processedRequest['id'] == id]
-        #print(self.processedRequests)
-        #print(returnElements)
+        # print(self.processedRequests)
+        # print(returnElements)
 
         if len(returnElements) > 0:
             return returnElements[-1]
@@ -209,4 +211,4 @@ if __name__ == "__main__":
     customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
-    flaskApp.run(debug=True)  # blocking
+    flaskApp.run(debug=False, port=80)  # blocking
