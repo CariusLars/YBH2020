@@ -5,6 +5,7 @@ from tables import SupportItemTable
 import os
 import json
 import datetime
+import ParseMails
 
 
 class CustomerSupport(object):
@@ -18,6 +19,11 @@ class CustomerSupport(object):
                          "user_name": "Bob the builder", "contact_details": "bob@builder.com"},
                "output": {"timestamp": 2, "sentiment": "angry", "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
         self.supportRequests.append(req)
+
+    def sendAllMailRequests(self):
+        list_of_mails = ParseMails.as_json(unique_content=True)
+        for mail in list_of_mails:
+            self.supportRequests.append(mail)
 
     def hello_world(self):
         return "Hello World!\nYou might want to navigate to the <a href='web/index.html'>Customer Support Site</a>"

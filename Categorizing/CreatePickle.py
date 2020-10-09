@@ -17,11 +17,13 @@ def whitelist():
 
 
 def blacklist():
+    black_manual = ['ja', 'nein']
     common_words = ParseMails.parse()['Mail']
     words_by_rank = {r: w for w, r in common_words.items()}
     good_words = whitelist()
     black = [words_by_rank[i] for i in range(100)]  # Blacklist the 100 most common words
     black = [f for f in black if f not in good_words]
+    black.extend(black_manual)
     do_pickle(black)
 
 
