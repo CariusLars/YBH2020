@@ -41,8 +41,10 @@ RUN pip3 install pandas flask flask_table xlrd requests nltk google google.cloud
 #==
 COPY --from=intermediate  /git/YBH2020 YBH2020
 
-EXPOSE 5000
-EXPOSE 80
+EXPOSE 5000/tcp
+EXPOSE 5000/udp
+EXPOSE 80/tcp
+EXPOSE 80/udp
 
 WORKDIR YBH2020
 CMD ["/YBH2020/deploy.sh"]
