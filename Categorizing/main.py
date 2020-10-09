@@ -4,11 +4,13 @@ from flask import Flask, request, jsonify, send_from_directory
 from tables import SupportItemTable
 import os
 import json
+import datetime
 
 
 class CustomerSupport(object):
     def __init__(self):
         self.supportRequests = []
+        self.processedRequests = []
         self.loginName = None
 
     def populateDebugSupportRequests(self):
@@ -25,10 +27,13 @@ class CustomerSupport(object):
 
     def customerRequestCallback(self):
         # TODO(lars)
-        print("called customerRequestCallback()")
+        #print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
-        print(request.form)
-        # TODO(lars) call analyzeRequest
+        serviceRequest = {"input": request.form.to_dict(),
+                          "output": {"timestamp": -1, "sentiment": [], "sentiment_prob": [], "categories": [], "categories_prob": [], "assignee": "", "answers": []}}
+
+        self.supportRequests.append(serviceRequest)
+        # analyzeRequest(serviceRequest)
         return 'Received the request!\n'  # response to your request.
 
     def analyzeRequest(self, requestJson):
@@ -38,6 +43,25 @@ class CustomerSupport(object):
     def assignRequest(self, requestJson):
         pass
         # TODO(jan)
+
+    def populateDebugProcessedRequests(self):
+        response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
+                    "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
+        self.processedRequests.append(response)
+
+    def checkProcessedRequestsCallback(self):
+        print("called checkProcessedRequestsCallback")
+        user_id = request.args.get('request_id')
+
+        returnElements = [
+            processedRequest for processedRequest in self.processedRequests if processedRequest['contact_details'] == user_id]
+        print(self.processedRequests)
+        print(returnElements)
+
+        if len(returnElements) > 0:
+            return returnElements[-1]
+        else:
+            return {}
 
     def generateHtmlTableAllRequests(self):
         table = SupportItemTable(self.supportRequests)
@@ -84,6 +108,8 @@ if __name__ == "__main__":
     flaskApp.add_url_rule('/', view_func=customerSupport.hello_world)
     flaskApp.add_url_rule('/customerRequestCallback',
                           methods=['POST'], view_func=customerSupport.customerRequestCallback)
+    flaskApp.add_url_rule('/checkProcessedRequestsCallback',
+                          methods=['GET'], view_func=customerSupport.checkProcessedRequestsCallback)
     flaskApp.add_url_rule('/customerSupport',
                           view_func=customerSupport.hello_world)
     flaskApp.add_url_rule('/web/<path:path>',
@@ -101,6 +127,7 @@ if __name__ == "__main__":
 
     # Debugging, remove later
     customerSupport.populateDebugSupportRequests()
+    customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=True)  # blocking
