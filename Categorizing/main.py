@@ -61,6 +61,7 @@ class CustomerSupport(object):
         request["output"]["category_score"] = resultDict["category_score"]
         request["output"]["extreme_negative"] = resultDict["extreme_negative"]
 
+        self.assignRequest(requestID)
         #print(self.supportRequests)
         #print(request)
         #print(resultDict)
@@ -68,7 +69,7 @@ class CustomerSupport(object):
 
 
     def assignRequest(self, requestID):
-        thresholdUncertainCategory = 4
+        thresholdUncertainCategory = -1
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
         request = [request for request in self.supportRequests if request["input"]
@@ -76,6 +77,7 @@ class CustomerSupport(object):
 
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
+            print("Diverse request. Category {}, Score {}".format(request["output"]["category"], request["output"]["category_score"]))
             # Get employee with least emails to process
             all_employees = {}
             for key in self.employees:
@@ -98,6 +100,8 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
+        print("supportRequests:")
+        print(self.supportRequests)
 
     def populateDebugProcessedRequests(self):
         response = {"id":1234,"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
