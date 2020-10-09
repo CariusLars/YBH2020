@@ -29,18 +29,34 @@ def blacklist():
     do_pickle(black)
 
 
-def wordcounts():
+def wordcounts(ignore_top=100):
     faqs = './../data/qa_data.xlsx'
     data = pd.read_excel(faqs)
+    faqs = {}
     words = {}
     for dpoint in data['Content']:
         words_in_dp = Utils.str_to_words(dpoint)
-        for w in words_in_dp:
-            if w not in words:
-                words[w] = 1
-            else:
-                words[w] += 1
+        words = Utils.words_to_frequency(words_in_dp, words)
+
+        faq_split = dpoint.split('?')
+        if len(faq_split) == 2:
+            question, answer = faq_split
+        elif len(faq_split) > 2:
+            question = faq_split[0]
+            answer = ' '.join(faq_split[1::])
+        else:
+            continue
+        faqs[question] = answer
+
+    tops = sorted([(f, w) for w, f in words.items() if isinstance(w, str)], reverse=True)
+    try:
+        tops_x = [entry[1] for entry in tops][:ignore_top]
+    except IndexError:
+        tops_x = [entry[1] for entry in tops]
+
     do_pickle(words, n='wordcounts_faq')
+    do_pickle(faqs, n='faq')
+    do_pickle(tops_x, n='ignore_words')
     return words
 
 
