@@ -45,7 +45,7 @@ class CustomerSupport(object):
 
     def customerRequestCallback(self):
         # TODO(lars)
-        #print("called customerRequestCallback()")
+        print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
         serviceRequest = {"input": request.form.to_dict(),
                           "output": {"timestamp": -1, "extreme_negative": False, "category": None, "category_score": 0, "assignee": "", "answers": []}}
@@ -69,8 +69,8 @@ class CustomerSupport(object):
         if resultDict["category_score"] > 4:
             category_only = resultDict["category"]
         else:
-            category_only = none
-        print(SimilarityScore.calculate(request["input"]["message"], 3, category_only))
+            category_only = None
+        request["output"]["answers"] = SimilarityScore.calculate(request["input"]["message"], 3, category_only)
 
         self.assignRequest(requestID)
         # print(self.supportRequests)
@@ -137,8 +137,8 @@ class CustomerSupport(object):
 
     def generateHtmlTableAllRequestsView(self):
         html_doc = ""
-        html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Refresh"> </form>'
-        html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Load Email Requests"> </form>'
+        html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Aktualisieren"> </form>'
+        html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Email Anfragen Importieren"> </form>'
         table = SupportItemTableView(self.supportRequests)
         html_doc += table.__html__()
         return html_doc
@@ -151,10 +151,23 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
-        html_doc = "<p>Replying to service request id "
-        html_doc += request.args.get('id') + "</p>"
-        html_doc += "<p><br>Type text here</p>"
-        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(
+        currentRequest = [
+            currentRequest for currentRequest in self.supportRequests if
+            currentRequest["input"]["id"] == request.args.get('id')][0]
+
+
+        html_doc = "<p>Anfrage von Nutzer: "
+        html_doc += "<b>" + currentRequest["input"]["user_name"] + "</b><br></p>"
+        html_doc += "<p><b>Service-Anfrage: </b><br></p>"
+        html_doc += currentRequest["input"]["message"]
+        html_doc += "<p><br> Ähnliche Fragen & Antworten: <br></p>"
+        for pair in currentRequest["output"]["answers"]:
+            html_doc += "<b>" + pair[0] + "?</b>"
+            html_doc += "<br>"
+            html_doc += pair[1]
+            html_doc += "<br><br>"
+        html_doc += "<p><br>Antwort eingeben:</p>"
+        html_doc += '<form action="send_reply" method="get"> <textarea name="message" cols="100" rows="10"></textarea> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Senden"> </form>'.format(
             request.args.get('id'))
         return html_doc
 
@@ -191,10 +204,10 @@ class CustomerSupport(object):
         html_doc = ""
 
         if self.loginName is None:
-            html_doc += "<p>Please log in</p>"
-            html_doc += '<form action="login" method="get"> Name: <input type="text" name="name"> <input type="submit" value="Submit"> </form>'
+            html_doc += "<p>Bitte melden Sie sich an</p>"
+            html_doc += '<form action="login" method="get"> Name: <input type="text" name="name"> <input type="submit" value="Login"> </form>'
         else:
-            html_doc += "<p>Logged in as " + self.loginName + "</p>"
+            html_doc += "<p>Angemeldet als: " + self.loginName + "</p>"
             html_doc += '<form action="logout" method="get"><input type="submit" value="Logout"> </form>'
             html_doc += 'The following tickets have been assigned to you:<br>'
             filteredSupportRequests = [
@@ -206,14 +219,14 @@ class CustomerSupport(object):
 
     def loginCallback(self):
         self.loginName = request.args.get('name')
-        html_doc = "Successfully logged in as " + self.loginName
-        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Let\'s get to work!"> </form>'
+        html_doc = "Erfolgreich angemeldet als " + self.loginName
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Service-Anfragen bearbeiten"> </form>'
         return html_doc
 
     def logoutCallback(self):
         self.loginName = None
-        html_doc = "Successfully logged out"
-        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Goodbye!"> </form>'
+        html_doc = "Abmeldung erfolgreich"
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Auf Wiedersehen!"> </form>'
         return html_doc
 
 
