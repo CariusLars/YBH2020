@@ -18,8 +18,9 @@ class CustomerSupport(object):
         # Read employee table
         raw = pd.read_excel('./../data/mitarbeiterplan.xls')
         self.employees = {x: {} for x in raw}
-        for key in self.employees.keys(): self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
-        #print(self.employees)
+        for key in self.employees.keys():
+            self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
+        # print(self.employees)
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -56,7 +57,8 @@ class CustomerSupport(object):
         thresholdUncertainCategory = 4
         #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
         #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Storungen", "Wasser"]
-        request = [request for request in self.processedRequests if request["input"]["id"] == contactDetailsString][0]
+        request = [request for request in self.processedRequests if request["input"]
+                   ["id"] == contactDetailsString][0]
 
         # Check if this is a diverse request
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
@@ -69,14 +71,15 @@ class CustomerSupport(object):
             request['output']['assignee'] = availableEmployee
             # Increase counter
 
-
         else:
             # Get employee with least emails to process from this category
-            availableEmployee = min(self.employees[request["output"]["category"]], key=self.employees[request["output"]["category"]].get)
+            availableEmployee = min(
+                self.employees[request["output"]["category"]], key=self.employees[request["output"]["category"]].get)
             # Assign to this employee
             request['output']['assignee'] = availableEmployee
             # Increase counter
-            self.employees[request["output"]["category"]][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
+            self.employees[request["output"]["category"]
+                           ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
 
     def populateDebugProcessedRequests(self):
         response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
