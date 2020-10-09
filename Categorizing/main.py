@@ -5,6 +5,7 @@ from tables import SupportItemTable
 import os
 import json
 import datetime
+import pandas as pd
 
 
 class CustomerSupport(object):
@@ -13,10 +14,16 @@ class CustomerSupport(object):
         self.processedRequests = []
         self.loginName = None
 
+        # Read employee table
+        raw = pd.read_excel('./../data/mitarbeiterplan.xls')
+        self.employees = {x: {} for x in raw}
+        for key in self.employees.keys(): self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
+        print(self.employees)
+
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
                          "user_name": "Bob the builder", "contact_details": "bob@builder.com"},
-               "output": {"timestamp": 2, "sentiment": "angry", "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
+               "output": {"timestamp": 2, "extreme_negative": False, "category":"Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
         self.supportRequests.append(req)
 
     def hello_world(self):
@@ -30,7 +37,7 @@ class CustomerSupport(object):
         #print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
         serviceRequest = {"input": request.form.to_dict(),
-                          "output": {"timestamp": -1, "sentiment": [], "sentiment_prob": [], "categories": [], "categories_prob": [], "assignee": "", "answers": []}}
+                          "output": {"timestamp": -1, "extreme_negative": False, "category": None, "category_score": 0, "assignee": "", "answers": []}}
 
         self.supportRequests.append(serviceRequest)
         # analyzeRequest(serviceRequest)
@@ -40,9 +47,21 @@ class CustomerSupport(object):
         pass
         # TODO(jonathan,chris); call assingRequest afterwards
 
-    def assignRequest(self, requestJson):
-        pass
-        # TODO(jan)
+    def assignRequest(self, contactDetailsString):
+        thresholdUncertainCategory = 10
+        #categories_requests = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Diverses", "Storungen", "Wasser"]
+        #categories_employees = ["Glasfaser", "Kehricht", "Strom", "Internet", "Netz", "Warme", "Mobilitat", "Umzug", "Bechwerden", "Storungen", "Wasser"]
+        request = [request for request in self.processedRequests if request["input"]["contact_details"] == contactDetailsString][0]
+        # Check if this is a diverse request
+        if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
+            # Get employee with least emails to process
+
+            # Assign to this employee
+
+            # Increase counter
+        else:
+            # Get employee with least emails to process from this category
+            min(self.employees[request["output"]["category"]], key=self.employees[request["output"]["category"]].get)
 
     def populateDebugProcessedRequests(self):
         response = {"timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
