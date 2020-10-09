@@ -54,7 +54,7 @@ greetings = ('hallo', 'guten tag', 'guten morgen', 'guten nachmittag',
              'hi', 'servus', 'grüzi', 'gruezi', 'guten abend')
 responses = ('ok', 'danke', 'alles klar', 'super')
 
-backend_addr = "http://127.0.0.1"
+backend_addr = "http://127.0.0.1:5000"
 
 
 def main():
