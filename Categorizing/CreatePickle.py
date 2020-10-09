@@ -15,7 +15,7 @@ def do_pickle(data, n=None):
 
 
 def whitelist():
-    return ['km', 'tv', 'frage', ]
+    return ['km', 'tv', 'frage']
 
 
 def blacklist():

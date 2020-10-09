@@ -22,8 +22,8 @@ def as_json(unique_content=False):
     content = ''
     for i, row in raw.iterrows():
         mail = {'input': {'timestamp': None, 'message': '', 'user_name':  '', 'contact_details': '', 'id': None},
-                'output': {'timestamp': None, 'sentiment': [], 'semtiment_prob': None, 'categories': '',
-                           'categories_prob': [], 'assignee': '', 'answers': []}}
+                'output': {'timestamp': None, 'sentiment': [], 'semtiment_prob': None, 'category': '',
+                           'categories_score': None, 'assignee': '', 'answers': []}}
         try:
             if unique_content:
                 if content == row['Mail']:
@@ -40,9 +40,9 @@ def as_json(unique_content=False):
 
 def parse():
     dwv_df = parse_xlsx(DWB_XLXS)
-    print("Loaded excel, here is an overview:\n", dwv_df.describe())
+    # print("Loaded excel, here is an overview:\n", dwv_df.describe())
     unique = dwv_df['Kategorie'].unique()
-    print("{} Unique Categories in the data:\n".format(len(unique)), unique)
+    # print("{} Unique Categories in the data:\n".format(len(unique)), unique)
     # mail_wordcount = count_occurences(dwv_df['Mail'])
     tops = top_words(dwv_df[['Mail', 'Betreff', 'Kategorie']])
     return tops

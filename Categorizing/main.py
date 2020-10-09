@@ -23,8 +23,8 @@ class CustomerSupport(object):
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
-                         "user_name": "Bob the builder", "contact_details": "bob@builder.com"},
-               "output": {"timestamp": 2, "extreme_negative": False, "category":"Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
+                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
+               "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
         self.supportRequests.append(req)
 
     def sendAllMailRequests(self):
