@@ -12,7 +12,7 @@ IGNOREWORDS = 'ignore_words.p'
 FAQ = 'faq.p'  # TODO: Include links
 
 
-def calculate(customer_request):
+def calculate(customer_request, top=3, category_only=None):
 
     def take_frequent_word(word_tuple, counts):
         if isinstance(word_tuple, str):
@@ -33,7 +33,7 @@ def calculate(customer_request):
     top_frequent = pickle.load(open(IGNOREWORDS, 'rb'))
     faq = pickle.load(open(FAQ, 'rb'))
     sims = {}
-    for q, a in faq.items():
+    for q, subdict in faq.items():
         q_aslist = Utils.str_to_words(q)
         overlap_t = Utils.basically_same(q_aslist, customer_request, ret_tuples=True)  # Get overlapping words between request and question
         overlap = [take_frequent_word(wt, wordcounts) for wt in overlap_t]
@@ -41,8 +41,20 @@ def calculate(customer_request):
             continue
         sims[q] = calc_speciality(wordcounts, overlap, top_frequent)
     ordered_faqs = sorted([(count, q) for q, count in sims.items()], reverse=True)
-    # tok_to_count = {t: wordcounts[tokens[t]] for t in tokens}
-    return ordered_faqs
+
+    answers = []
+    i = 0
+    while (len(answers) < top) and (i < len(ordered_faqs)):
+        qna = ordered_faqs[i]
+        i += 1
+        question = qna[1]
+        answer = faq[question]['answer']
+        cat = faq[question]['category']
+        if category_only is not None:
+            if not cat == category_only:
+                continue  # Do not return FAQs from the wrong category
+        answers.append([question, answer])
+    return answers
 
 
 def calc_speciality(alphabet, words_for_h, tops):
@@ -78,6 +90,6 @@ def str2alphabet(str_in):
 
 
 if __name__ == '__main__':
-    myrequest = 'guten Tag, ich möchte gerne meine Strom Energie Zähler zerstören'
-    test = calculate(Utils.str_to_words(myrequest))
-    req = ['hallo', 'ich', 'habe', 'ein', 'problem', 'mit', 'meinem', 'internet', 'tv', 'glasfaser', 'router']
+    myrequest = 'Kann ich auf Ökostrom wechseln?'
+    test = calculate(Utils.str_to_words(myrequest), category_only='Strom')
+    print('Done')

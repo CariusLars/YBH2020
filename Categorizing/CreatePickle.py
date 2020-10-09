@@ -1,5 +1,6 @@
 import pandas as pd
 import pickle
+from nltk.corpus import stopwords
 
 import ParseMails
 import Utils
@@ -32,9 +33,11 @@ def blacklist():
 def wordcounts(ignore_top=100):
     faqs = './../data/qa_data.xlsx'
     data = pd.read_excel(faqs)
-    faqs = {}
     words = {}
-    for dpoint in data['Content']:
+    faq = {}
+    for idx, row in data.iterrows():
+        dpoint = row['Content']
+        category = row['Category']
         words_in_dp = Utils.str_to_words(dpoint)
         words = Utils.words_to_frequency(words_in_dp, words)
 
@@ -46,17 +49,23 @@ def wordcounts(ignore_top=100):
             answer = ' '.join(faq_split[1::])
         else:
             continue
-        faqs[question] = answer
+        faq[question] = {}
+        faq[question]['answer'] = answer
+        faq[question]['category'] = category
 
-    tops = sorted([(f, w) for w, f in words.items() if isinstance(w, str)], reverse=True)
-    try:
-        tops_x = [entry[1] for entry in tops][:ignore_top]
-    except IndexError:
-        tops_x = [entry[1] for entry in tops]
+    # tops = sorted([(f, w) for w, f in words.items() if isinstance(w, str)], reverse=True)
+    # try:
+    #     tops_x = [entry[1] for entry in tops][:ignore_top]
+    # except IndexError:
+    #     tops_x = [entry[1] for entry in tops]
+    # tops_x = [w for w in tops_x if w not in stop_words]
+    # ignore_words = tops_x.extend(list(stop_words))
+    stop_words = set(stopwords.words("german"))
+    ignore_words = list(stop_words)
 
     do_pickle(words, n='wordcounts_faq')
-    do_pickle(faqs, n='faq')
-    do_pickle(tops_x, n='ignore_words')
+    do_pickle(faq, n='faq')
+    do_pickle(ignore_words, n='ignore_words')
     return words
 
 
