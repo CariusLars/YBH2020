@@ -26,7 +26,7 @@ class CustomerSupport(object):
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
-                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
+                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': 7},
                "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
         self.supportRequests.append(req)
 
@@ -111,10 +111,10 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
-        #print("supportRequests:")
-        #print(self.supportRequests)
+        # print("supportRequests:")
+        # print(self.supportRequests)
         #print("Employee Status")
-        #print(self.employees)
+        # print(self.employees)
 
     def populateDebugProcessedRequests(self):
         response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
@@ -151,18 +151,20 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
-        html_doc = "<p>Replying to service request from "
-        html_doc += request.args.get('id') + "</p"
+        html_doc = "<p>Replying to service request id "
+        html_doc += request.args.get('id') + "</p>"
         html_doc += "<p><br>Type text here</p>"
-        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(request.args.get('id'))
+        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(
+            request.args.get('id'))
         return html_doc
 
     def sendReplyRequestCallback(self):
-        html_doc = "<p> You've replied successfully</p"
+        html_doc = "<p> You've replied successfully</p>"
         html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Back to ticket overview"> </form>'
         # Send reply to Telegram bot
         try:
-            currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
+            currentRequest = [
+                currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
             response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
                         "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
                         "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
@@ -175,7 +177,8 @@ class CustomerSupport(object):
                 all_employees.update(self.employees[key])
             for key in self.employees:
                 if currentRequest["output"]["assignee"] in self.employees[key].keys():
-                    self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
+                    self.employees[key][currentRequest["output"]["assignee"]
+                                        ] = self.employees[key][currentRequest["output"]["assignee"]] - 1
                     break
             # Update database
             currentRequest["output"]["assignee"] = "done"
@@ -254,8 +257,8 @@ if __name__ == "__main__":
         return "page not found", 404
 
     # Debugging, remove later
-    #customerSupport.populateDebugSupportRequests()
-    #customerSupport.populateDebugProcessedRequests()
+    # customerSupport.populateDebugSupportRequests()
+    # customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=False)  # blocking
