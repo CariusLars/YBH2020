@@ -33,6 +33,7 @@ class CustomerSupport(object):
         list_of_mails = ParseMails.as_json(unique_content=True)
         for mail in list_of_mails:
             self.supportRequests.append(mail)
+            self.analyzeRequest(mail['input']['id'])
         return 'parsed emails<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Go back"> </form>'
 
     def hello_world(self):
@@ -102,10 +103,10 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
-        print("supportRequests:")
-        print(self.supportRequests)
-        print("Employee Status")
-        print(self.employees)
+        #print("supportRequests:")
+        #print(self.supportRequests)
+        #print("Employee Status")
+        #print(self.employees)
 
     def populateDebugProcessedRequests(self):
         response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
@@ -152,24 +153,26 @@ class CustomerSupport(object):
         html_doc = "<p> You've replied successfully</p"
         html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Back to ticket overview"> </form>'
         # Send reply to Telegram bot
-        currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
-        response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
-                    "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
-                    "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
-                    "message": request.args.get('message')}
-        self.processedRequests.append(response)
+        try:
+            currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
+            response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
+                        "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
+                        "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
+                        "message": request.args.get('message')}
+            self.processedRequests.append(response)
 
-        # Reduce count of pending emails for assignee
-        all_employees = {}
-        for key in self.employees:
-            all_employees.update(self.employees[key])
-        for key in self.employees:
-            if currentRequest["output"]["assignee"] in self.employees[key].keys():
-                self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
-                break
-        # Update database
-        currentRequest["output"]["assignee"] = "done"
-
+            # Reduce count of pending emails for assignee
+            all_employees = {}
+            for key in self.employees:
+                all_employees.update(self.employees[key])
+            for key in self.employees:
+                if currentRequest["output"]["assignee"] in self.employees[key].keys():
+                    self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
+                    break
+            # Update database
+            currentRequest["output"]["assignee"] = "done"
+        except:
+            pass
 
         return html_doc
 
