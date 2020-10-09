@@ -1,5 +1,4 @@
 # Dockerfile forchickenservicerequest YB Hack 2020
-# tag with: docker tag  <imageHash> jcarius/chickenservicerequest:202010092050
 # docker tag <imageHash> chickenservicerequest.azurecr.io/chickenservicerequest:2020100922205
 # push with docker push chickenservicerequest.azurecr.io/chickenservicerequest:2020100922205
 # run locally with: docker run --network=host -it jcarius/chickenservicerequest:202010092050

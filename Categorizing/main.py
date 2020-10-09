@@ -208,6 +208,10 @@ if __name__ == "__main__":
     flaskApp.add_url_rule(
         '/web/logout', view_func=customerSupport.logoutCallback)
 
+    @flaskApp.errorhandler(404)
+    def page_not_found(e):
+        return "page not found", 404
+
     # Debugging, remove later
     customerSupport.populateDebugSupportRequests()
     customerSupport.populateDebugProcessedRequests()
