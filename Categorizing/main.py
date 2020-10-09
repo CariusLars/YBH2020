@@ -25,6 +25,7 @@ class CustomerSupport(object):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
                          "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
                "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
+        self.supportRequests.append(req)
 
     def sendAllMailRequests(self):
         list_of_mails = ParseMails.as_json(unique_content=True)
@@ -68,7 +69,10 @@ class CustomerSupport(object):
             # Assign to this employee
             request['output']['assignee'] = availableEmployee
             # Increase counter
-
+            for key in self.employees:
+                if availableEmployee in self.employees[key].keys():
+                    self.employees[key][availableEmployee] = self.employees[key][availableEmployee] + 1
+                    break
 
         else:
             # Get employee with least emails to process from this category
