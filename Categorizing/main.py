@@ -19,13 +19,12 @@ class CustomerSupport(object):
         raw = pd.read_excel('./../data/mitarbeiterplan.xls')
         self.employees = {x: {} for x in raw}
         for key in self.employees.keys(): self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
-        print(self.employees)
+        #print(self.employees)
 
     def populateDebugSupportRequests(self):
-        req = {"input": {"id": 1, "timestamp": 1, "message": "My internet is leaking",
-                         "user_name": "Bob the builder", "contact_details": "bob@builder.com"},
-               "output": {"timestamp": 2, "extreme_negative": False, "category":"Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
-        self.supportRequests.append(req)
+        req = {"input": {"timestamp": 1, "message": "My internet is leaking",
+                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
+               "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
 
     def sendAllMailRequests(self):
         list_of_mails = ParseMails.as_json(unique_content=True)
@@ -69,7 +68,7 @@ class CustomerSupport(object):
             # Assign to this employee
             request['output']['assignee'] = availableEmployee
             # Increase counter
-            
+
 
         else:
             # Get employee with least emails to process from this category
