@@ -164,13 +164,21 @@ class CustomerSupport(object):
         html_doc = "<p>Anfrage von Nutzer: "
         html_doc += "<b>" + currentRequest["input"]["user_name"] + "</b><br></p>"
         html_doc += "<p><b>Service-Anfrage: </b><br></p>"
-        html_doc += currentRequest["input"]["message"]
+        html_doc += "<i>" + currentRequest["input"]["message"] + "</i>"
         html_doc += "<p><br> Ähnliche Fragen & Antworten: <br></p>"
         for pair in currentRequest["output"]["answers"]:
             html_doc += "<b>" + pair[0] + "?</b>"
             html_doc += "<br>"
             html_doc += pair[1]
             html_doc += "<br><br>"
+
+        html_doc += "<p><b>Nützliche Links: </b><br></p>"
+        for (description, link) in self.links[currentRequest["output"]["category"]]:
+            html_doc += description + ": " + "<a href=\"" + link + "\">" + link + "</a><br>"
+        if currentRequest["output"]["category_score"] <= 4:
+            for (description, link) in self.links["Diverses"]:
+                html_doc += description + ": " + "<a href=\"" + link + "\">" + link + "</a><br>"
+
         html_doc += "<p><br>Antwort eingeben:</p>"
         html_doc += '<form action="send_reply" method="get"> <textarea name="message" cols="100" rows="10"></textarea> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Senden"> </form>'.format(
             request.args.get('id'))
