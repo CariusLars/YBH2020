@@ -24,8 +24,8 @@ class CustomerSupport(object):
             self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
         # print(self.employees)
         self.links={"Glasfaser":[("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Kehricht":[], "Strom":[("Strom Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-beziehen"),("Solaranlage / Strom produzieren Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-produzieren"),("Solarrechner","https://www.ewb-solarrechner.ch/"),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")], "Internet":[("ewb Internet und TV","https://www.ewwwb.ch/"),("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Netz":[("Netzdienstleistungen Produktinfos","https://www.ewb.ch/privatkunden/angebot/netz-nutzen")],
-                    "Warme":[("Fernwärme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"),("Gas Produktinfos","https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat":[("Mobilität Produktinfos","https://www.ewb.ch/privatkunden/angebot/mobilitaet"),("Move Elektromobilität", "http://www.move.ch/")], "Umzug":[("Umzugsmeldung","https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses":[("Übersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"),("Übersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
-                    "Storungen":[("Meldung defekte/ störende Beleuchtung"),("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser":[("Wassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"),("Abwassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"),("Wasserhärte in der Stadt Bern","https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
+                    "Warme":[("Fernwaerme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"),("Gas Produktinfos","https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat":[("Mobilitaet Produktinfos","https://www.ewb.ch/privatkunden/angebot/mobilitaet"),("Move Elektromobilitaet", "http://www.move.ch/")], "Umzug":[("Umzugsmeldung","https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses":[("uebersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"),("uebersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
+                    "Storungen":[("Meldung defekte/ storende Beleuchtung"),("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser":[("Wassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"),("Abwassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"),("Wasserhaerte in der Stadt Bern","https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -38,7 +38,7 @@ class CustomerSupport(object):
         for mail in list_of_mails:
             self.supportRequests.append(mail)
             self.analyzeRequest(mail['input']['id'])
-        return 'Emails erfolgreich importiert<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Zurück zur Übersicht"> </form>'
+        return 'Emails erfolgreich importiert<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Zurueck zur Ubersicht"> </form>'
 
     def hello_world(self):
         return "Hello World!\nYou might want to navigate to the <a href='web/index.html'>Customer Support Site</a>"
@@ -121,7 +121,7 @@ class CustomerSupport(object):
 
     def populateDebugProcessedRequests(self):
         response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
-                    "user_name": "Lars", "assignee": "Halbes Hähnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
+                    "user_name": "Lars", "assignee": "Halbes Haehnchen", "message": "Nicht so schlimm, wir liefern schnell eine Neue!"}
         self.processedRequests.append(response)
 
     def checkProcessedRequestsCallback(self):
@@ -165,14 +165,14 @@ class CustomerSupport(object):
         html_doc += "<b>" + currentRequest["input"]["user_name"] + "</b><br></p>"
         html_doc += "<p><b>Service-Anfrage: </b><br></p>"
         html_doc += "<i>" + currentRequest["input"]["message"] + "</i>"
-        html_doc += "<p><br> Ähnliche Fragen & Antworten: <br></p>"
+        html_doc += "<p><br> Aehnliche Fragen & Antworten: <br></p>"
         for pair in currentRequest["output"]["answers"]:
             html_doc += "<b>" + pair[0] + "?</b>"
             html_doc += "<br>"
             html_doc += pair[1]
             html_doc += "<br><br>"
 
-        html_doc += "<p><b>Nützliche Links: </b><br></p>"
+        html_doc += "<p><b>Nuetzliche Links: </b><br></p>"
         for (description, link) in self.links[currentRequest["output"]["category"]]:
             html_doc += description + ": " + "<a href=\"" + link + "\">" + link + "</a><br>"
         if currentRequest["output"]["category_score"] <= 4:
