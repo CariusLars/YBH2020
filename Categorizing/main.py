@@ -30,7 +30,7 @@ class CustomerSupport(object):
         self.supportRequests.append(req)
 
     def sendAllMailRequests(self):
-        list_of_mails = ParseMails.as_json(unique_content=True)
+        list_of_mails = ParseMails.as_json(unique_content=True, shortest=10)
         for mail in list_of_mails:
             self.supportRequests.append(mail)
             self.analyzeRequest(mail['input']['id'])
