@@ -23,9 +23,15 @@ class CustomerSupport(object):
         for key in self.employees.keys():
             self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
         # print(self.employees)
-        self.links={"Glasfaser":[("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Kehricht":[], "Strom":[("Strom Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-beziehen"),("Solaranlage / Strom produzieren Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-produzieren"),("Solarrechner","https://www.ewb-solarrechner.ch/"),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")], "Internet":[("ewb Internet und TV","https://www.ewwwb.ch/"),("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Netz":[("Netzdienstleistungen Produktinfos","https://www.ewb.ch/privatkunden/angebot/netz-nutzen")],
-                    "Warme":[("Fernwaerme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"),("Gas Produktinfos","https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat":[("Mobilitaet Produktinfos","https://www.ewb.ch/privatkunden/angebot/mobilitaet"),("Move Elektromobilitaet", "http://www.move.ch/")], "Umzug":[("Umzugsmeldung","https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses":[("uebersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"),("uebersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
-                    "Storungen":[("Meldung defekte/ storende Beleuchtung"),("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser":[("Wassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"),("Abwassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"),("Wasserhaerte in der Stadt Bern","https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
+        self.links = {"Glasfaser": [("Internet und Glasfaser Produktinfos", "https://www.ewb.ch/privatkunden/angebot/internet")], "Kehricht": [], "Strom": [("Strom Produktinfos", "https://www.ewb.ch/privatkunden/angebot/strom-beziehen"), ("Solaranlage / Strom produzieren Produktinfos", "https://www.ewb.ch/privatkunden/angebot/strom-produzieren"), ("Solarrechner", "https://www.ewb-solarrechner.ch/"), ("Energieberatung und Contracting Produktinfos", "https://www.ewb.ch/privatkunden/angebot/dienstleistungen")], "Internet": [("ewb Internet und TV", "https://www.ewwwb.ch/"), ("Internet und Glasfaser Produktinfos", "https://www.ewb.ch/privatkunden/angebot/internet")], "Netz": [("Netzdienstleistungen Produktinfos", "https://www.ewb.ch/privatkunden/angebot/netz-nutzen")],
+                      "Warme": [("Fernwaerme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"), ("Gas Produktinfos", "https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat": [("Mobilitaet Produktinfos", "https://www.ewb.ch/privatkunden/angebot/mobilitaet"), ("Move Elektromobilitaet", "http://www.move.ch/")], "Umzug": [("Umzugsmeldung", "https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses": [("uebersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"), ("uebersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="), ("Energieberatung und Contracting Produktinfos", "https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
+                      "Storungen": [("Meldung defekte/ storende Beleuchtung"), ("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser": [("Wassertarife Stadt Bern", "https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"), ("Abwassertarife Stadt Bern", "https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"), ("Wasserhaerte in der Stadt Bern", "https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
+
+    def reset(self):
+        self.supportRequests = []
+        self.processedRequests = []
+        self.loginName = None
+        return "Reset"
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -73,7 +79,8 @@ class CustomerSupport(object):
             category_only = resultDict["category"]
         else:
             category_only = None
-        request["output"]["answers"] = SimilarityScore.calculate(request["input"]["message"], 3, category_only)
+        request["output"]["answers"] = SimilarityScore.calculate(
+            request["input"]["message"], 3, category_only)
 
         self.assignRequest(requestID)
         # print(self.supportRequests)
@@ -165,9 +172,9 @@ class CustomerSupport(object):
             currentRequest for currentRequest in self.supportRequests if
             currentRequest["input"]["id"] == request.args.get('id')][0]
 
-
         html_doc = "<p>Anfrage von Nutzer: "
-        html_doc += "<b>" + currentRequest["input"]["user_name"] + "</b><br></p>"
+        html_doc += "<b>" + \
+            currentRequest["input"]["user_name"] + "</b><br></p>"
         html_doc += "<p><b>Service-Anfrage: </b><br></p>"
         html_doc += "<i>" + currentRequest["input"]["message"] + "</i>"
         html_doc += "<p><br> Aehnliche Fragen & Antworten: <br></p>"
@@ -306,6 +313,8 @@ if __name__ == "__main__":
         '/web/reply', view_func=customerSupport.replyRequestCallback)
     flaskApp.add_url_rule(
         '/web/send_reply', view_func=customerSupport.sendReplyRequestCallback)
+    flaskApp.add_url_rule(
+        '/web/reset', view_func=customerSupport.reset)
 
     @flaskApp.errorhandler(404)
     def page_not_found(e):
@@ -316,4 +325,4 @@ if __name__ == "__main__":
     # customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
-    flaskApp.run(debug=False)  # blocking
+    flaskApp.run(host='0.0.0.0', debug=False)  # blocking
