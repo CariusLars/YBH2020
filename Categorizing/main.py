@@ -140,8 +140,8 @@ class CustomerSupport(object):
         html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Aktualisieren"> </form>'
         html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Email Anfragen Importieren"> </form>'
         filteredSupportRequests = [
-            supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["Mitarbeiter"] != "done"]
-        table = SupportItemTableView(self.filteredSupportRequests)
+            supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["assignee"] != "done"]
+        table = SupportItemTableView(filteredSupportRequests)
         html_doc += table.__html__()
         return html_doc
 

@@ -31,7 +31,7 @@ class SupportItemTableEdit(Table):
     out_assignee = Col('Mitarbeiter', attr_list=['output', 'assignee'])
     #out_answers = Col('Answers', attr_list=['output', 'answers'])
 
-    action_del = ButtonCol('', 'deleteRequestCallback',
+    action_del = ButtonCol('Löschen', 'deleteRequestCallback',
                            url_kwargs=dict(id=['input', 'user_name']))
-    action_reply = ButtonCol('', 'replyRequestCallback',
+    action_reply = ButtonCol('Antworten', 'replyRequestCallback',
                              url_kwargs=dict(id=['input', 'id']))
