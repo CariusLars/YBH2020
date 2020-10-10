@@ -23,6 +23,9 @@ class CustomerSupport(object):
         for key in self.employees.keys():
             self.employees[key] = {x: 0 for x in raw[key] if str(x) != 'nan'}
         # print(self.employees)
+        self.links={"Glasfaser":[("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Kehricht":[], "Strom":[("Strom Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-beziehen"),("Solaranlage / Strom produzieren Produktinfos","https://www.ewb.ch/privatkunden/angebot/strom-produzieren"),("Solarrechner","https://www.ewb-solarrechner.ch/"),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")], "Internet":[("ewb Internet und TV","https://www.ewwwb.ch/"),("Internet und Glasfaser Produktinfos","https://www.ewb.ch/privatkunden/angebot/internet")], "Netz":[("Netzdienstleistungen Produktinfos","https://www.ewb.ch/privatkunden/angebot/netz-nutzen")],
+                    "Warme":[("Fernwärme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"),("Gas Produktinfos","https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat":[("Mobilität Produktinfos","https://www.ewb.ch/privatkunden/angebot/mobilitaet"),("Move Elektromobilität", "http://www.move.ch/")], "Umzug":[("Umzugsmeldung","https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses":[("Übersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"),("Übersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="),("Energieberatung und Contracting Produktinfos","https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
+                    "Storungen":[("Meldung defekte/ störende Beleuchtung"),("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser":[("Wassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"),("Abwassertarife Stadt Bern","https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"),("Wasserhärte in der Stadt Bern","https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
@@ -35,7 +38,7 @@ class CustomerSupport(object):
         for mail in list_of_mails:
             self.supportRequests.append(mail)
             self.analyzeRequest(mail['input']['id'])
-        return 'parsed emails<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Go back"> </form>'
+        return 'Emails erfolgreich importiert<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Zurück zur Übersicht"> </form>'
 
     def hello_world(self):
         return "Hello World!\nYou might want to navigate to the <a href='web/index.html'>Customer Support Site</a>"
