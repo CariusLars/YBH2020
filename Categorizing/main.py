@@ -27,6 +27,12 @@ class CustomerSupport(object):
                       "Warme": [("Fernwaerme Produktinfos", "https://www.ewb.ch/privatkunden/angebot/fernwaerme"), ("Gas Produktinfos", "https://www.ewb.ch/privatkunden/angebot/waerme-aus-gas")], "Mobilitat": [("Mobilitaet Produktinfos", "https://www.ewb.ch/privatkunden/angebot/mobilitaet"), ("Move Elektromobilitaet", "http://www.move.ch/")], "Umzug": [("Umzugsmeldung", "https://www.ewb.ch/kundenservice/kundendienst-kontakt/anmeldung-umzug")], "Diverses": [("uebersicht FAQ und weiteres Wissen", "https://www.ewb.ch/wissen"), ("uebersicht Baustellen", "https://map.bern.ch/stadtplan/?grundplan=stadtplan_farbig&koor=2600650,1199750&zoom=2&hl=0&layer="), ("Energieberatung und Contracting Produktinfos", "https://www.ewb.ch/privatkunden/angebot/dienstleistungen")],
                       "Storungen": [("Meldung defekte/ storende Beleuchtung"), ("https://www.ewb.ch/kundenservice/kundendienst-kontakt/meldeformular-defekte-leuchten/detail")], "Wasser": [("Wassertarife Stadt Bern", "https://stadtrecht.bern.ch/lexoverview-home/lex-752_312"), ("Abwassertarife Stadt Bern", "https://stadtrecht.bern.ch/lexoverview-home/lex-821_12"), ("Wasserhaerte in der Stadt Bern", "https://www.ewb.ch/wissen/wissen/wissen-wasser-wasserhaerte")]}
 
+    def reset(self):
+        self.supportRequests = []
+        self.processedRequests = []
+        self.loginName = None
+        return "Reset"
+
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
                          "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': 7},
@@ -283,6 +289,8 @@ if __name__ == "__main__":
         '/web/reply', view_func=customerSupport.replyRequestCallback)
     flaskApp.add_url_rule(
         '/web/send_reply', view_func=customerSupport.sendReplyRequestCallback)
+    flaskApp.add_url_rule(
+        '/web/reset', view_func=customerSupport.reset)
 
     @flaskApp.errorhandler(404)
     def page_not_found(e):
