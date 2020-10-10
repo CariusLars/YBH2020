@@ -14,9 +14,10 @@ DWB_XLXS = './../data/Mails.xlsx'
 RANDOM_NAMES = './../data/random_names.txt'
 
 
-def as_json(unique_content=False):
+def as_json(unique_content=False, shortest=None):
     raw = parse_xlsx(DWB_XLXS)
     ret = []
+    shortmail_identifier = []
     with open(RANDOM_NAMES, 'r') as ntxt:
         names = ntxt.read().split()
     content = ''
@@ -34,10 +35,25 @@ def as_json(unique_content=False):
             mail['input']['user_name'] = username  # Our ground truth is anonymized
             mail['input']['contact_details'] = str(username + '@half.a.chicken.ch')
             mail['input']['id'] = random.randint(0, 2**16-1)
+            date_generator = random.random()
+            mail['input']['timestamp'] = Utils.random_date('1/1/2020 8:00 AM', '9/10/2020 8:00 PM', '%m/%d/%Y %I:%M %p', date_generator)
             ret.append(mail)
+
+            if shortest is not None:
+                chars_in_mail = len(mail['input']['message'])
+                shortmail_identifier.append((chars_in_mail, len(ret)-1))
+
         except TypeError:
             pass  # Ignore rows in wrong format
 
+    if shortest is not None:
+        if shortest >= len(shortmail_identifier):
+            return ret
+        short_ret = []
+        shortmail_identifier.sort()
+        for i in range(shortest):
+            short_ret.append(ret[shortmail_identifier[i][1]])
+        return short_ret
     return ret
 
 
@@ -93,4 +109,4 @@ def count_occurences(series):
 
 
 if __name__ == '__main__':
-    as_json()
+    as_json(shortest=5)

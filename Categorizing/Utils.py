@@ -2,6 +2,7 @@
 from difflib import SequenceMatcher
 import itertools
 import math
+import time
 import re
 
 
@@ -50,3 +51,14 @@ def basically_same(list1, list2, ret_tuples=False):
         return ''
     ret = list(map(samesame, itertools.product(list1, list2)))
     return ret
+
+
+def random_date(start, end, dformat, prop):
+    """source: https://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates"""
+    stime = time.mktime(time.strptime(start, dformat))
+    etime = time.mktime(time.strptime(end, dformat))
+
+    ptime = stime + prop * (etime - stime)
+
+    return time.strftime(dformat, time.localtime(ptime))
+
