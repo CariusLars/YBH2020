@@ -12,6 +12,7 @@ path = 'google_credentials.json'
 client = language.LanguageServiceClient.from_service_account_json(path)
 
 nltk.download('stopwords')
+nltk.download('punkt')
 df_top10 = pd.read_excel('top_10_words.xls')
 
 stop_words=set(stopwords.words("german"))
