@@ -292,4 +292,4 @@ if __name__ == "__main__":
     # customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
-    flaskApp.run(debug=False)  # blocking
+    flaskApp.run(host='0.0.0.0', debug=False)  # blocking
