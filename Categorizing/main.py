@@ -8,6 +8,7 @@ import datetime
 import ParseMails
 import pandas as pd
 import nlp
+import SimilarityScore
 
 
 class CustomerSupport(object):
@@ -25,7 +26,7 @@ class CustomerSupport(object):
 
     def populateDebugSupportRequests(self):
         req = {"input": {"timestamp": 1, "message": "My internet is leaking",
-                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': None},
+                         "user_name": "Bob the builder", "contact_details": "bob@builder.com", 'id': 7},
                "output": {"timestamp": 2, "extreme_negative": False, "category": "Glasfaser", "category_score": 14, "assignee": "John Travolta", "answers": ["Internets don't leak"]}}
         self.supportRequests.append(req)
 
@@ -44,7 +45,7 @@ class CustomerSupport(object):
 
     def customerRequestCallback(self):
         # TODO(lars)
-        #print("called customerRequestCallback()")
+        print("called customerRequestCallback()")
         # Access elements with something like print(request.form['param2'])
         serviceRequest = {"input": request.form.to_dict(),
                           "output": {"timestamp": -1, "extreme_negative": False, "category": None, "category_score": 0, "assignee": "", "answers": []}}
@@ -63,6 +64,13 @@ class CustomerSupport(object):
         request["output"]["category"] = resultDict["category"]
         request["output"]["category_score"] = resultDict["category_score"]
         request["output"]["extreme_negative"] = resultDict["extreme_negative"]
+
+        # Calculate most probable FAQs
+        if resultDict["category_score"] > 4:
+            category_only = resultDict["category"]
+        else:
+            category_only = None
+        request["output"]["answers"] = SimilarityScore.calculate(request["input"]["message"], 3, category_only)
 
         self.assignRequest(requestID)
         # print(self.supportRequests)
@@ -103,10 +111,10 @@ class CustomerSupport(object):
             # Increase counter
             self.employees[request["output"]["category"]
                            ][availableEmployee] = self.employees[request["output"]["category"]][availableEmployee] + 1
-        #print("supportRequests:")
-        #print(self.supportRequests)
+        # print("supportRequests:")
+        # print(self.supportRequests)
         #print("Employee Status")
-        #print(self.employees)
+        # print(self.employees)
 
     def populateDebugProcessedRequests(self):
         response = {"id": 1234, "timestamp_request": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "timestamp_reply": -1, "contact_details": "266433173",
@@ -129,9 +137,11 @@ class CustomerSupport(object):
 
     def generateHtmlTableAllRequestsView(self):
         html_doc = ""
-        html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Refresh"> </form>'
-        html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Load Email Requests"> </form>'
-        table = SupportItemTableView(self.supportRequests)
+        html_doc += '<form action="generateHtmlTableAllRequestsView" method="get"><input type="submit" value="Aktualisieren"> </form>'
+        html_doc += '<form action="loadEmailRequests" method="get"><input type="submit" value="Email Anfragen Importieren"> </form>'
+        filteredSupportRequests = [
+            supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["Mitarbeiter"] != "done"]
+        table = SupportItemTableView(self.filteredSupportRequests)
         html_doc += table.__html__()
         return html_doc
 
@@ -143,18 +153,33 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
-        html_doc = "<p>Replying to service request from "
-        html_doc += request.args.get('id') + "</p"
-        html_doc += "<p><br>Type text here</p>"
-        html_doc += '<form action="send_reply" method="get"> Message: <input type="text" name="message"> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Submit"> </form>'.format(request.args.get('id'))
+        currentRequest = [
+            currentRequest for currentRequest in self.supportRequests if
+            currentRequest["input"]["id"] == request.args.get('id')][0]
+
+
+        html_doc = "<p>Anfrage von Nutzer: "
+        html_doc += "<b>" + currentRequest["input"]["user_name"] + "</b><br></p>"
+        html_doc += "<p><b>Service-Anfrage: </b><br></p>"
+        html_doc += currentRequest["input"]["message"]
+        html_doc += "<p><br> Ähnliche Fragen & Antworten: <br></p>"
+        for pair in currentRequest["output"]["answers"]:
+            html_doc += "<b>" + pair[0] + "?</b>"
+            html_doc += "<br>"
+            html_doc += pair[1]
+            html_doc += "<br><br>"
+        html_doc += "<p><br>Antwort eingeben:</p>"
+        html_doc += '<form action="send_reply" method="get"> <textarea name="message" cols="100" rows="10"></textarea> ID: <input type="text" value="{}" name="id" readonly> <input type="submit" value="Senden"> </form>'.format(
+            request.args.get('id'))
         return html_doc
 
     def sendReplyRequestCallback(self):
-        html_doc = "<p> You've replied successfully</p"
+        html_doc = "<p> You've replied successfully</p>"
         html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Back to ticket overview"> </form>'
         # Send reply to Telegram bot
         try:
-            currentRequest = [currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
+            currentRequest = [
+                currentRequest for currentRequest in self.supportRequests if currentRequest["input"]["id"] == request.args.get('id')][0]
             response = {"id": request.args.get('id'), "timestamp_request": currentRequest["input"]["timestamp"],
                         "timestamp_reply": datetime.datetime.now().strftime("%d.%m.%Y, %H:%M"), "contact_details": currentRequest["input"]["contact_details"],
                         "user_name": currentRequest["input"]["user_name"], "assignee": currentRequest["output"]["assignee"],
@@ -167,7 +192,8 @@ class CustomerSupport(object):
                 all_employees.update(self.employees[key])
             for key in self.employees:
                 if currentRequest["output"]["assignee"] in self.employees[key].keys():
-                    self.employees[key][currentRequest["output"]["assignee"]] = self.employees[key][currentRequest["output"]["assignee"]] - 1
+                    self.employees[key][currentRequest["output"]["assignee"]
+                                        ] = self.employees[key][currentRequest["output"]["assignee"]] - 1
                     break
             # Update database
             currentRequest["output"]["assignee"] = "done"
@@ -180,12 +206,12 @@ class CustomerSupport(object):
         html_doc = ""
 
         if self.loginName is None:
-            html_doc += "<p>Please log in</p>"
-            html_doc += '<form action="login" method="get"> Name: <input type="text" name="name"> <input type="submit" value="Submit"> </form>'
+            html_doc += "<p>Bitte melden Sie sich an</p>"
+            html_doc += '<form action="login" method="get"> Name: <input type="text" name="name"> <input type="submit" value="Login"> </form>'
         else:
-            html_doc += "<p>Logged in as " + self.loginName + "</p>"
+            html_doc += "<p>Angemeldet als: " + self.loginName + "</p>"
             html_doc += '<form action="logout" method="get"><input type="submit" value="Logout"> </form>'
-            html_doc += 'The following tickets have been assigned to you:<br>'
+            html_doc += 'Ihnen wurden die folgenden Anfragen zugeteilt:<br>'
             filteredSupportRequests = [
                 supportRequest for supportRequest in self.supportRequests if supportRequest["output"]["assignee"] == self.loginName]
             table = SupportItemTableEdit(filteredSupportRequests)
@@ -195,14 +221,14 @@ class CustomerSupport(object):
 
     def loginCallback(self):
         self.loginName = request.args.get('name')
-        html_doc = "Successfully logged in as " + self.loginName
-        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Let\'s get to work!"> </form>'
+        html_doc = "Erfolgreich angemeldet als " + self.loginName
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Service-Anfragen bearbeiten"> </form>'
         return html_doc
 
     def logoutCallback(self):
         self.loginName = None
-        html_doc = "Successfully logged out"
-        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Goodbye!"> </form>'
+        html_doc = "Abmeldung erfolgreich"
+        html_doc += '<form action="serviceWorkerProcessing" method="get"><input type="submit" value="Auf Wiedersehen!"> </form>'
         return html_doc
 
 
@@ -246,8 +272,8 @@ if __name__ == "__main__":
         return "page not found", 404
 
     # Debugging, remove later
-    #customerSupport.populateDebugSupportRequests()
-    #customerSupport.populateDebugProcessedRequests()
+    # customerSupport.populateDebugSupportRequests()
+    # customerSupport.populateDebugProcessedRequests()
 
     print("Flask server started. Terminate with ctrl+c")
     flaskApp.run(debug=False)  # blocking
