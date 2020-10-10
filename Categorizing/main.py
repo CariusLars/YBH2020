@@ -156,6 +156,11 @@ class CustomerSupport(object):
         return html_doc
 
     def replyRequestCallback(self):
+        print(request.args.get('id'))
+        print(self.supportRequests)
+        print([
+            currentRequest for currentRequest in self.supportRequests if
+            currentRequest["input"]["id"] == request.args.get('id')])
         currentRequest = [
             currentRequest for currentRequest in self.supportRequests if
             currentRequest["input"]["id"] == request.args.get('id')][0]

@@ -34,7 +34,7 @@ def as_json(unique_content=False, shortest=None):
             username = random.choice(names)
             mail['input']['user_name'] = username  # Our ground truth is anonymized
             mail['input']['contact_details'] = str(username + '@half.a.chicken.ch')
-            mail['input']['id'] = random.randint(0, 2**16-1)
+            mail['input']['id'] = str(random.randint(0, 2**16-1))
             date_generator = random.random()
             mail['input']['timestamp'] = Utils.random_date('1/1/2020 8:00 AM', '9/10/2020 8:00 PM', '%m/%d/%Y %I:%M %p', date_generator)
             ret.append(mail)

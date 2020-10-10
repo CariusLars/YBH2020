@@ -136,7 +136,7 @@ def main():
             if result:  # True if requested customer ID is in the processed request database
                 if "@" not in result['contact_details']:
                     customerServiceBot.send_message(result['contact_details'],
-                                                    'Hallo {},\nwir Antworten auf Ihre Serviceanfrage vom {}.\n{}\n---\nMit freundlichen Grüßen,\n{} vom ewb Kundenservice'.format(result["user_name"], result['timestamp_request'], result['message'], result['assignee']))
+                                                    'Hallo {},\nwir antworten auf Ihre Serviceanfrage vom {}.\n\n{}\n---\nMit freundlichen Grüßen,\n{} vom ewb Kundenservice'.format(result["user_name"], result['timestamp_request'], result['message'], result['assignee']))
                 request_ids.remove(request_id)
 
 
