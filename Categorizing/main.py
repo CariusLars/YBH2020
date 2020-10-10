@@ -235,6 +235,28 @@ class CustomerSupport(object):
 
         return html_doc
 
+    def workloadVisualizer(self):
+        html_doc = '<form action="workloadVisualizer" method="get"><input type="submit" value="Aktualisieren"> </form>'
+        html_doc += "<p>"
+        for key in self.employees:
+            html_doc += "<b>" + key + ": </b>"
+            current_load = sum(self.employees[key].values())
+            max_load = 5 * len(self.employees[key].keys())
+            load_indicator = current_load/max_load
+            if load_indicator < 0.2:
+                html_doc += " <img src=\"green.png\" alt=\"green circle\" width=\"30\" height=\"30\"> "
+            elif load_indicator > 0.8:
+                html_doc += " <img src=\"red.png\" alt=\"red circle\" width=\"30\" height=\"30\"> "
+            else:
+                html_doc += " <img src=\"orange.png\" alt=\"orange circle\" width=\"30\" height=\"30\"> "
+            html_doc += " Auslastung: {} von {}".format(current_load, max_load)
+            html_doc += "<br>"
+
+        html_doc += "</p>"
+
+        return html_doc
+
+
     def loginCallback(self):
         self.loginName = request.args.get('name')
         html_doc = "Erfolgreich angemeldet als " + self.loginName
@@ -274,6 +296,8 @@ if __name__ == "__main__":
         '/web/reply', methods=['POST'], view_func=customerSupport.replyRequestCallback)
     flaskApp.add_url_rule('/web/serviceWorkerProcessing',
                           view_func=customerSupport.serviceWorkerProcessing)
+    flaskApp.add_url_rule('/web/workloadVisualizer',
+                          view_func=customerSupport.workloadVisualizer)
     flaskApp.add_url_rule(
         '/web/login', view_func=customerSupport.loginCallback)
     flaskApp.add_url_rule(
