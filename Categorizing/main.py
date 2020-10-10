@@ -99,6 +99,8 @@ class CustomerSupport(object):
         if request["output"]["category_score"] <= thresholdUncertainCategory or request["output"]["category"] == "Diverses":
             print("Diverse request. Category {}, Score {}".format(
                 request["output"]["category"], request["output"]["category_score"]))
+            # Update category to diverse
+            request["output"]["category"] = "Diverses"
             # Get employee with least emails to process
             all_employees = {}
             for key in self.employees:
