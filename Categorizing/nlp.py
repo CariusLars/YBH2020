@@ -8,8 +8,12 @@ from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
 
-path = 'google_credentials.json'
-client = language.LanguageServiceClient.from_service_account_json(path)
+try:
+  path = 'google_credentials.json'
+  client = language.LanguageServiceClient.from_service_account_json(path)
+except FileNotFoundError:
+  print("Language Sentiment Analysis Deactivated")
+  client = None
 
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -42,9 +46,12 @@ def google_sentiment(text):
     document = language.types.Document(
             content=text,
             type=language.enums.Document.Type.PLAIN_TEXT)
-    annotations = client.analyze_sentiment(document=document)
-    score = annotations.document_sentiment.score
-    magnitude = annotations.document_sentiment.magnitude
+    if client != None:
+        annotations = client.analyze_sentiment(document=document)
+        score = annotations.document_sentiment.score
+        magnitude = annotations.document_sentiment.magnitude
+    else:
+        score = 1.0
     if (score <= 0.0):
         ex_negative = True
     else:
